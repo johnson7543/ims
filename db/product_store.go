@@ -16,7 +16,7 @@ const productColl = "products"
 type ProductStore interface {
 	InsertProduct(context.Context, *types.Product) (*types.Product, error)
 	GetProducts(context.Context, bson.M) ([]*types.Product, error)
-	DeleteProduct(ctx context.Context, id primitive.ObjectID) error
+	DeleteProduct(ctx context.Context, id primitive.ObjectID) (int64, error)
 	GetProductColors(ctx context.Context) ([]string, error)
 	GetProductSizes(ctx context.Context) ([]string, error)
 }
@@ -67,9 +67,9 @@ func (s *MongoProductStore) InsertProduct(ctx context.Context, product *types.Pr
 	return product, nil
 }
 
-func (s *MongoProductStore) DeleteProduct(ctx context.Context, id primitive.ObjectID) error {
-	_, err := s.coll.DeleteOne(ctx, bson.M{"_id": id})
-	return err
+func (s *MongoProductStore) DeleteProduct(ctx context.Context, id primitive.ObjectID) (int64, error) {
+	deleteResult, err := s.coll.DeleteOne(ctx, bson.M{"_id": id})
+	return deleteResult.DeletedCount, err
 }
 
 func (s *MongoProductStore) GetProductColors(ctx context.Context) ([]string, error) {

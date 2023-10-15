@@ -16,7 +16,7 @@ const workerColl = "workers"
 type WorkerStore interface {
 	InsertWorker(context.Context, *types.Worker) (*types.Worker, error)
 	GetWorkers(context.Context, bson.M) ([]*types.Worker, error)
-	DeleteWorker(ctx context.Context, id primitive.ObjectID) error
+	DeleteWorker(ctx context.Context, id primitive.ObjectID) (int64, error)
 }
 
 type MongoWorkerStore struct {
@@ -65,7 +65,7 @@ func (s *MongoWorkerStore) InsertWorker(ctx context.Context, worker *types.Worke
 	return worker, nil
 }
 
-func (s *MongoWorkerStore) DeleteWorker(ctx context.Context, id primitive.ObjectID) error {
-	_, err := s.coll.DeleteOne(ctx, bson.M{"_id": id})
-	return err
+func (s *MongoWorkerStore) DeleteWorker(ctx context.Context, id primitive.ObjectID) (int64, error) {
+	deleteResult, err := s.coll.DeleteOne(ctx, bson.M{"_id": id})
+	return deleteResult.DeletedCount, err
 }

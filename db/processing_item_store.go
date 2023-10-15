@@ -16,7 +16,7 @@ const processingItemColl = "processing_items"
 type ProcessingItemStore interface {
 	InsertProcessingItem(context.Context, *types.ProcessingItem) (*types.ProcessingItem, error)
 	GetProcessingItems(context.Context, bson.M) ([]*types.ProcessingItem, error)
-	DeleteProcessingItem(ctx context.Context, id primitive.ObjectID) error
+	DeleteProcessingItem(ctx context.Context, id primitive.ObjectID) (int64, error)
 }
 
 type MongoProcessingItemStore struct {
@@ -65,7 +65,7 @@ func (s *MongoProcessingItemStore) InsertProcessingItem(ctx context.Context, pro
 	return processingItem, nil
 }
 
-func (s *MongoProcessingItemStore) DeleteProcessingItem(ctx context.Context, id primitive.ObjectID) error {
-	_, err := s.coll.DeleteOne(ctx, bson.M{"_id": id})
-	return err
+func (s *MongoProcessingItemStore) DeleteProcessingItem(ctx context.Context, id primitive.ObjectID) (int64, error) {
+	deleteResult, err := s.coll.DeleteOne(ctx, bson.M{"_id": id})
+	return deleteResult.DeletedCount, err
 }

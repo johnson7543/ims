@@ -16,7 +16,7 @@ const materialColl = "materials"
 type MaterialStore interface {
 	InsertMaterial(context.Context, *types.Material) (*types.Material, error)
 	GetMaterials(context.Context, bson.M) ([]*types.Material, error)
-	DeleteMaterial(ctx context.Context, id primitive.ObjectID) error
+	DeleteMaterial(ctx context.Context, id primitive.ObjectID) (int64, error)
 	GetMaterialColors(ctx context.Context) ([]string, error)
 	GetMaterialSizes(ctx context.Context) ([]string, error)
 }
@@ -67,9 +67,10 @@ func (s *MongoMaterialStore) InsertMaterial(ctx context.Context, material *types
 	return material, nil
 }
 
-func (s *MongoMaterialStore) DeleteMaterial(ctx context.Context, id primitive.ObjectID) error {
-	_, err := s.coll.DeleteOne(ctx, bson.M{"_id": id})
-	return err
+func (s *MongoMaterialStore) DeleteMaterial(ctx context.Context, id primitive.ObjectID) (int64, error) {
+	deleteResult, err := s.coll.DeleteOne(ctx, bson.M{"_id": id})
+
+	return deleteResult.DeletedCount, err
 }
 
 func (s *MongoMaterialStore) GetMaterialColors(ctx context.Context) ([]string, error) {

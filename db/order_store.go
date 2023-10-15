@@ -16,7 +16,7 @@ const orderColl = "orders"
 type OrderStore interface {
 	InsertOrder(ctx context.Context, order *types.Order) (*types.Order, error)
 	GetOrders(ctx context.Context, filter bson.M) ([]*types.Order, error)
-	DeleteOrder(ctx context.Context, id primitive.ObjectID) error
+	DeleteOrder(ctx context.Context, id primitive.ObjectID) (int64, error)
 }
 
 type MongoOrderStore struct {
@@ -65,7 +65,7 @@ func (s *MongoOrderStore) GetOrders(ctx context.Context, filter bson.M) ([]*type
 	return orders, nil
 }
 
-func (s *MongoOrderStore) DeleteOrder(ctx context.Context, id primitive.ObjectID) error {
-	_, err := s.coll.DeleteOne(ctx, bson.M{"_id": id})
-	return err
+func (s *MongoOrderStore) DeleteOrder(ctx context.Context, id primitive.ObjectID) (int64, error) {
+	deleteResult, err := s.coll.DeleteOne(ctx, bson.M{"_id": id})
+	return deleteResult.DeletedCount, err
 }

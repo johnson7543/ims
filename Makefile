@@ -1,8 +1,8 @@
 build:
-	@go build -o bin/api 
+	@go build -o bin/ims-app 
 
 run: build
-	@./bin/api
+	@./bin/ims-app
 
 seed_user:
 	@go run scripts/user/seed_user.go
@@ -24,9 +24,9 @@ seed_order:
 
 docker:
 	echo "building docker file"
-	@docker build -t api .
-	echo "running API inside Docker container"
-	@docker run -p 3000:3000 api
+	@docker build -t ims-app .
+	echo "running ims-app inside Docker container"
+	@docker run -p 3000:3000 ims-app
 
 test:
 	@go test -v ./...

@@ -207,9 +207,14 @@ func (h *OrderHandler) HandleDeleteOrder(c *fiber.Ctx) error {
 		})
 	}
 
-	err = h.store.Order.DeleteOrder(c.Context(), objID)
+	deleteCount, err := h.store.Order.DeleteOrder(c.Context(), objID)
 	if err != nil {
 		return err
+	}
+	if deleteCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Material not found",
+		})
 	}
 
 	return c.JSON(fiber.Map{
