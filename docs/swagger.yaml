@@ -1,0 +1,731 @@
+basePath: /
+definitions:
+  api.AuthParams:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  api.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/types.User'
+    type: object
+  api.InsertMaterialParams:
+    properties:
+      color:
+        type: string
+      name:
+        type: string
+      quantity:
+        type: string
+      remarks:
+        type: string
+      size:
+        type: string
+    type: object
+  api.InsertOrderParams:
+    properties:
+      customerId:
+        type: string
+      deliveryDate:
+        type: string
+      orderDate:
+        type: string
+      orderItems:
+        items:
+          $ref: '#/definitions/api.OrderItemParams'
+        type: array
+      paymentDate:
+        type: string
+      shippingAddress:
+        type: string
+      status:
+        type: string
+      totalAmount:
+        type: number
+    type: object
+  api.InsertProcessingItemParams:
+    properties:
+      endDate:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      remarks:
+        type: string
+      sku:
+        type: string
+      startDate:
+        type: string
+      workerId:
+        type: string
+    type: object
+  api.InsertProductParams:
+    properties:
+      color:
+        type: string
+      date:
+        type: string
+      material:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      remark:
+        type: string
+      size:
+        type: string
+    type: object
+  api.InsertWorkerParams:
+    properties:
+      address:
+        type: string
+      company:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      taxIdNumber:
+        type: string
+    type: object
+  api.OrderItemParams:
+    properties:
+      product:
+        $ref: '#/definitions/api.OrderProductParams'
+      quantity:
+        type: integer
+      totalPrice:
+        type: number
+    type: object
+  api.OrderProductParams:
+    properties:
+      sku:
+        type: string
+      unitPrice:
+        type: number
+    type: object
+  api.genericResp:
+    properties:
+      msg:
+        type: string
+      type:
+        type: string
+    type: object
+  fiber.Map:
+    additionalProperties: true
+    type: object
+  types.Material:
+    properties:
+      color:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      quantity:
+        type: string
+      remarks:
+        type: string
+      size:
+        type: string
+    type: object
+  types.Order:
+    properties:
+      customerId:
+        type: string
+      deliveryDate:
+        type: string
+      id:
+        type: string
+      orderDate:
+        type: string
+      orderItems:
+        items:
+          $ref: '#/definitions/types.OrderItem'
+        type: array
+      paymentDate:
+        type: string
+      shippingAddress:
+        type: string
+      status:
+        type: string
+      totalAmount:
+        type: number
+    type: object
+  types.OrderItem:
+    properties:
+      product:
+        $ref: '#/definitions/types.OrderProduct'
+      quantity:
+        type: integer
+      totalPrice:
+        type: number
+    type: object
+  types.OrderProduct:
+    properties:
+      sku:
+        type: string
+      unitPrice:
+        type: number
+    type: object
+  types.ProcessingItem:
+    properties:
+      endDate:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      remarks:
+        type: string
+      sku:
+        type: string
+      startDate:
+        type: string
+      workerId:
+        type: string
+    type: object
+  types.Product:
+    properties:
+      color:
+        type: string
+      date:
+        type: string
+      id:
+        type: string
+      material:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      remark:
+        type: string
+      size:
+        type: string
+    type: object
+  types.User:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: string
+      isAdmin:
+        type: boolean
+      lastName:
+        type: string
+    type: object
+  types.Worker:
+    properties:
+      address:
+        type: string
+      company:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      taxIdNumber:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: fiber@swagger.io
+    name: API Support
+  description: This is a sample swagger for Fiber
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Fiber Example API
+  version: "1.0"
+paths:
+  /authenticate:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user based on email and password.
+      parameters:
+      - description: Authentication parameters
+        in: body
+        name: authParams
+        required: true
+        schema:
+          $ref: '#/definitions/api.AuthParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.AuthResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.genericResp'
+      summary: Authenticate user
+      tags:
+      - Auth
+  /material:
+    get:
+      description: Get a list of materials based on the provided filters.
+      parameters:
+      - description: Material ID (optional)
+        in: query
+        name: id
+        type: string
+      - description: Material name (optional)
+        in: query
+        name: name
+        type: string
+      - description: Material color (optional)
+        in: query
+        name: color
+        type: string
+      - description: Material size (optional)
+        in: query
+        name: size
+        type: string
+      - description: Material quantity (optional)
+        in: query
+        name: quantity
+        type: string
+      - description: Material remarks (optional)
+        in: query
+        name: remarks
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.Material'
+            type: array
+      summary: Get materials
+      tags:
+      - Material
+    post:
+      consumes:
+      - application/json
+      description: Insert a new material into the system.
+      parameters:
+      - description: Material details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.InsertMaterialParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Material'
+      summary: Insert material
+      tags:
+      - Material
+  /material/{id}:
+    delete:
+      description: Delete a material from the system.
+      parameters:
+      - description: Material ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      summary: Delete material
+      tags:
+      - Material
+  /material/colors:
+    get:
+      description: Get a list of unique material colors.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: Get material colors
+      tags:
+      - Material
+  /material/sizes:
+    get:
+      description: Get a list of unique material sizes.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: Get material sizes
+      tags:
+      - Material
+  /order:
+    get:
+      description: Retrieves a list of orders based on query parameters.
+      parameters:
+      - description: Order ID
+        in: query
+        name: id
+        type: string
+      - description: Customer ID
+        in: query
+        name: customerId
+        type: string
+      - description: Order status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.Order'
+            type: array
+      summary: Get orders
+      tags:
+      - Order
+    post:
+      consumes:
+      - application/json
+      description: Inserts a new order.
+      parameters:
+      - description: Order information
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/api.InsertOrderParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Order'
+      summary: Insert order
+      tags:
+      - Order
+  /order/{id}:
+    delete:
+      description: Deletes an order by ID.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      summary: Delete order
+      tags:
+      - Order
+  /processingItem:
+    get:
+      description: Retrieves a list of processing items based on query parameters.
+      parameters:
+      - description: Processing item ID
+        in: query
+        name: id
+        type: string
+      - description: Processing item name
+        in: query
+        name: name
+        type: string
+      - description: Quantity
+        in: query
+        name: quantity
+        type: string
+      - description: Price
+        in: query
+        name: price
+        type: string
+      - description: Worker ID
+        in: query
+        name: workerId
+        type: string
+      - description: 'Start date (format: YYYY-MM-DD)'
+        in: query
+        name: startDate
+        type: string
+      - description: 'End date (format: YYYY-MM-DD)'
+        in: query
+        name: endDate
+        type: string
+      - description: Product ID
+        in: query
+        name: sku
+        type: string
+      - description: Remarks
+        in: query
+        name: remarks
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.ProcessingItem'
+            type: array
+      summary: Get processing items
+      tags:
+      - Processing Item
+    post:
+      consumes:
+      - application/json
+      description: Inserts a new processing item.
+      parameters:
+      - description: Processing item information
+        in: body
+        name: processingItem
+        required: true
+        schema:
+          $ref: '#/definitions/api.InsertProcessingItemParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.ProcessingItem'
+      summary: Insert processing item
+      tags:
+      - Processing Item
+  /processingItem/{id}:
+    delete:
+      description: Deletes a processing item by ID.
+      parameters:
+      - description: Processing item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      summary: Delete processing item
+      tags:
+      - Processing Item
+  /product:
+    get:
+      description: Retrieves a list of products based on query parameters.
+      parameters:
+      - description: Product ID
+        in: query
+        name: id
+        type: string
+      - description: Product name
+        in: query
+        name: name
+        type: string
+      - description: Material
+        in: query
+        name: material
+        type: string
+      - description: Color
+        in: query
+        name: color
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Quantity
+        in: query
+        name: quantity
+        type: string
+      - description: Price
+        in: query
+        name: price
+        type: string
+      - description: 'Date (format: YYYY-MM-DD)'
+        in: query
+        name: date
+        type: string
+      - description: Remark
+        in: query
+        name: remark
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.Product'
+            type: array
+      summary: Get products
+      tags:
+      - Product
+    post:
+      consumes:
+      - application/json
+      description: Inserts a new product.
+      parameters:
+      - description: Product information
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/api.InsertProductParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Product'
+      summary: Insert product
+      tags:
+      - Product
+  /product/{id}:
+    delete:
+      description: Deletes a product by ID.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      summary: Delete product
+      tags:
+      - Product
+  /worker:
+    get:
+      description: Retrieves a list of workers based on query parameters.
+      parameters:
+      - description: Worker ID
+        in: query
+        name: id
+        type: string
+      - description: Company name
+        in: query
+        name: company
+        type: string
+      - description: Worker name
+        in: query
+        name: name
+        type: string
+      - description: Phone number
+        in: query
+        name: phone
+        type: string
+      - description: Address
+        in: query
+        name: address
+        type: string
+      - description: Tax ID number
+        in: query
+        name: taxIdNumber
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.Worker'
+            type: array
+      summary: Get workers
+      tags:
+      - Worker
+    post:
+      consumes:
+      - application/json
+      description: Inserts a new worker.
+      parameters:
+      - description: Worker information
+        in: body
+        name: worker
+        required: true
+        schema:
+          $ref: '#/definitions/api.InsertWorkerParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.Worker'
+      summary: Insert worker
+      tags:
+      - Worker
+  /worker/{id}:
+    delete:
+      description: Deletes a worker by ID.
+      parameters:
+      - description: Worker ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      summary: Delete worker
+      tags:
+      - Worker
+swagger: "2.0"
