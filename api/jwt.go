@@ -36,7 +36,6 @@ func JWTAuthentication(userStore db.UserStore) fiber.Handler {
 		}
 		// Set the current authenticated user to the context.
 		c.Context().SetUserValue("user", user)
-		fmt.Printf("user authenticated: %v\n", user.FirstName)
 		return c.Next()
 	}
 }

@@ -73,3 +73,14 @@ go get -u github.com/swaggo/swag/cmd/swag
 ```
 swag init --parseDependency --parseInternal
 ```
+
+### Start/Stop the server
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart ims-app
+sudo systemctl status ims-app
+
+sudo systemctl stop ims-app
+sudo pkill -f ims-app
+```
