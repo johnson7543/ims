@@ -11,7 +11,6 @@ COPY . /build/
 RUN go get -d -v ./...
 RUN CGO_ENABLED=0 go build -a -installsuffix cgo --ldflags "-s -w" -o /build/ims
 
-
 # Final stage
 FROM alpine:latest
 

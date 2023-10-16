@@ -4,6 +4,15 @@ orbs:
   aws-ecr: circleci/aws-ecr@8.2.1
   aws-ecs: circleci/aws-ecs@0.0.22
 
+jobs:
+  build:
+    docker:
+      - image: alpine
+    environment:
+      ENV_MONGO_DB_PASSWORD: $ENV_MONGO_DB_PASSWORD
+   steps:
+      - run: sh -c env
+
 workflows:
   build_and_push_image:
     jobs:
