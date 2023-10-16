@@ -20,6 +20,8 @@ WORKDIR /app
 COPY --from=builder /build/ims /app/
 COPY --from=builder /build/.env /app/
 
+ENV ENV_MONGO_DB_PASSWORD $ENV_MONGO_DB_PASSWORD
+
 # Replace placeholder in .env file
 RUN echo "$ENV_MONGO_DB_PASSWORD" | base64 -d | tr -d '\n' > /tmp/mongo_password && \
     sed -i "s/{ENV_MONGO_DB_PASSWORD}/$(cat /tmp/mongo_password)/g" /app/.env
