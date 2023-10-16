@@ -3,6 +3,8 @@ FROM golang:latest as builder
 
 WORKDIR /build
 
+RUN echo "$ENV_VARIABLE_NAME" | base64 --decode >> .env
+
 # Copy the entire application and .env file
 COPY . /build/
 
@@ -15,11 +17,14 @@ FROM alpine:latest
 
 WORKDIR /app
 
-# Copy the ims binary from the builder stage
+# Replace placeholder in .env file
+RUN echo "$ENV_MONGO_DB_PASSWORD" | base64 --decode | tr -d '\n' > /tmp/mongo_password && \
+    sed -i "s/{ENV_MONGO_DB_PASSWORD}/$(cat /tmp/mongo_password)/g" /build/.env
+
+COPY --from=builder /build/.env /app/
 COPY --from=builder /build/ims /app/
 
-# Copy the .env file from the builder stage
-COPY --from=builder /build/.env /app/
+
 RUN chmod +x /app/ims
 EXPOSE 8080
 
