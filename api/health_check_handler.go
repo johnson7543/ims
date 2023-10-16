@@ -21,13 +21,15 @@ func (h *HealthCheckHandler) HandleHealthCheck(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"server_status": "ok",
 			"db_status":     err,
+			"db_version":    "unknown",
 			"status":        "error occurred in db connection",
 		})
 	}
 
 	return c.JSON(fiber.Map{
 		"server_status": "ok",
-		"db_status":     healthCheck,
+		"db_status":     "ok",
+		"db_version":    healthCheck,
 		"status":        "ok",
 	})
 }
