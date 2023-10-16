@@ -16,12 +16,12 @@ import (
 )
 
 type AuthHandler struct {
-	userStore db.UserStore
+	store *db.Store
 }
 
-func NewAuthHandler(userStore db.UserStore) *AuthHandler {
+func NewAuthHandler(store *db.Store) *AuthHandler {
 	return &AuthHandler{
-		userStore: userStore,
+		store: store,
 	}
 }
 
@@ -63,7 +63,7 @@ func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 	if err := c.BodyParser(&params); err != nil {
 		return err
 	}
-	user, err := h.userStore.GetUserByEmail(c.Context(), params.Email)
+	user, err := h.store.User.GetUserByEmail(c.Context(), params.Email)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return invalidCredentials(c)

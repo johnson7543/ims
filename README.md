@@ -24,57 +24,23 @@ MONGO_DB_URL=
 
 ## Resources
 
-### Mongodb driver
+### Swaggo
 
-Documentation
-
-```
-https://mongodb.com/docs/drivers/go/current/quick-start
-```
-
-Installing mongodb client
-
-```
-go get go.mongodb.org/mongo-driver/mongo
-```
-
-### gofiber
-
-Documentation
-
-```
-https://gofiber.io
-```
-
-Installing gofiber
-
-```
-go get github.com/gofiber/fiber/v2
-```
-
-## Docker
-
-### Installing mongodb as a Docker container
-
-```
-docker run --name mongodb -d mongo:latest
-```
-
-## Swaggo
-
-### Installing swaggo
+#### Installing swaggo
 
 ```
 go get -u github.com/swaggo/swag/cmd/swag
 ```
 
-### Generating swagger docs
+#### Generating swagger docs
 
 ```
 swag init --parseDependency --parseInternal
 ```
 
-### Start/Stop the server
+### Run the Server
+
+#### Start/Stop the server
 
 ```bash
 sudo systemctl daemon-reload
@@ -83,4 +49,25 @@ sudo systemctl status ims-app
 
 sudo systemctl stop ims-app
 sudo pkill -f ims-app
+```
+
+#### Run with Docker
+
+```bash
+# login in docker with AWS
+aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 248679804578.dkr.ecr.ap-northeast-1.amazonaws.com
+
+docker build -t ims-ecs:v1 .
+docker tag ims-ecs:v1 248679804578.dkr.ecr.ap-northeast-1.amazonaws.com/ims:latest
+docker push 248679804578.dkr.ecr.ap-northeast-1.amazonaws.com/ims:latest
+
+# run in local
+docker run --name ims-local -p 8080:8080 ims-ecs:v1
+```
+
+#### Some AWS cmd
+
+```bash
+aws ecs register-task-definition --cli-input-json file://task-definition.json
+aws ecs create-service --cli-input-json file://ecs-service.json
 ```

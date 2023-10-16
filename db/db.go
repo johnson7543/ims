@@ -8,6 +8,7 @@ type Pagination struct {
 }
 
 type Store struct {
+	HealthCheck    HealthCheckStore
 	User           UserStore
 	Material       MaterialStore
 	Worker         WorkerStore

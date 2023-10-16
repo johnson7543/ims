@@ -1,0 +1,14 @@
+{
+    "cluster": "ims-cluster",
+    "serviceName": "ims-service",
+    "taskDefinition": "ims-service",
+    "loadBalancers": [
+        {
+            "targetGroupArn": "arn:aws:elasticloadbalancing:ap-northeast-1:248679804578:targetgroup/ims-target-group/623041eaed53932c",
+            "containerName": "ims-service",
+            "containerPort": 8080
+        }
+    ],
+    "desiredCount": 1,
+    "role": "ecsServiceRole"
+}

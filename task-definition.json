@@ -1,0 +1,21 @@
+{
+    "family": "ims-service",
+    "containerDefinitions": [
+        {
+            "name": "ims-service",
+            "image": "248679804578.dkr.ecr.ap-northeast-1.amazonaws.com/ims:latest",
+            "cpu": 128,
+            "memoryReservation": 128,
+            "portMappings": [
+                {
+                    "containerPort": 8080,
+                    "protocol": "tcp"
+                }
+            ],
+            "command": [
+                "./ims"
+            ],
+            "essential": true
+        }
+    ]
+}

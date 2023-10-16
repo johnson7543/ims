@@ -41,6 +41,7 @@ func main() {
 	}
 
 	var (
+		healthCheckStore    = db.NewMongoHealthCheckStore(client)
 		userStore           = db.NewMongoUserStore(client)
 		materialStore       = db.NewMongoMaterialStore(client)
 		workerStore         = db.NewMongoWorkerStore(client)
@@ -48,6 +49,7 @@ func main() {
 		productStore        = db.NewMongoProductStore(client)
 		orderStore          = db.NewMongoOrderStore(client)
 		store               = &db.Store{
+			HealthCheck:    healthCheckStore,
 			User:           userStore,
 			Material:       materialStore,
 			Worker:         workerStore,
@@ -55,16 +57,20 @@ func main() {
 			Product:        productStore,
 			Order:          orderStore,
 		}
-		authHandler           = api.NewAuthHandler(userStore)
+		HealthCheckHandler    = api.NewHealthCheckHandler(store)
+		authHandler           = api.NewAuthHandler(store)
 		materialHandler       = api.NewMaterialHandler(store)
 		workerHandler         = api.NewWorkerHandler(store)
 		processingItemHandler = api.NewProcessingItemHandler(store)
 		productHandler        = api.NewProductHandler(store)
 		orderHandler          = api.NewOrderHandler(store)
 		app                   = fiber.New(config)
+		healthCheck           = app.Group("/health")
 		auth                  = app.Group("/api")
 		apiv1                 = app.Group("/api/v1", api.JWTAuthentication(userStore))
 	)
+
+	healthCheck.Get("/", HealthCheckHandler.HandleHealthCheck)
 
 	auth.Post("/auth", authHandler.HandleAuthenticate)
 
