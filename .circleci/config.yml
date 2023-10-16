@@ -8,11 +8,10 @@ workflows:
   build_and_push_image:
     jobs:
       - aws-ecr/build-and-push-image:
-          context: aws-dev
+          context: aws-dev # config in circle context page
           create-repo: true
           dockerfile: Dockerfile
-          path: .
-          repo: circleci-ecr-demo
+          repo: "${AWS_RESOURCE_NAME_PREFIX}"
           tag: "$CIRCLE_SHA1"
       - aws-ecs/deploy-service-update:
           requires:
