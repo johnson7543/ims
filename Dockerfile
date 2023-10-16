@@ -5,6 +5,8 @@ WORKDIR /build
 
 # Copy the entire application and .env file
 COPY . /build/
+COPY .env /build/
+
 
 RUN go get -d -v ./...
 RUN CGO_ENABLED=0 go build -a -installsuffix cgo --ldflags "-s -w" -o /build/ims
