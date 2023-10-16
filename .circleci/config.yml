@@ -9,7 +9,7 @@ jobs:
     docker:
       - image: alpine:latest
     environment: 
-      ENV_MONGO_DB_PASSWORD: ${ENV_MONGO_DB_PASSWORD}
+      DB_PASSWORD: ${MONGO_DB_PASSWORD}
     steps:
       - run: sh -c env
 
@@ -21,11 +21,11 @@ workflows:
           create-repo: true
           dockerfile: Dockerfile
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
-          tag: "$CIRCLE_SHA1"
+          tag: "${CIRCLE_SHA1}"
       - aws-ecs/deploy-service-update:
           requires:
             - aws-ecr/build-and-push-image
-          aws-region: AWS_DEFAULT_REGION
+          aws-region: ${AWS_DEFAULT_REGION}
           family: '${AWS_RESOURCE_NAME_PREFIX}-service'
           cluster-name: '${AWS_RESOURCE_NAME_PREFIX}-cluster'
           container-image-name-updates: 'container=${AWS_RESOURCE_NAME_PREFIX}-service,tag=${CIRCLE_SHA1}'
