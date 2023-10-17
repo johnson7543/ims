@@ -10,7 +10,7 @@ jobs:
       - image: alpine
     environment:
       ENV_MONGO_DB_PASSWORD: $ENV_MONGO_DB_PASSWORD
-   steps:
+    steps:
       - run: sh -c env
 
 workflows:
