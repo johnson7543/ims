@@ -4,6 +4,14 @@ orbs:
   aws-ecr: circleci/aws-ecr@6.2.0
   aws-ecs: circleci/aws-ecs@0.0.11
 
+jobs:
+  build:
+    machine:
+      image: ubuntu-2204:current
+      resource_class: large
+    steps:
+      - checkout
+
 workflows:
   build_and_push_image:
     jobs:
