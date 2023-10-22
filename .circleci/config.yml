@@ -4,22 +4,9 @@ orbs:
   aws-ecr: circleci/aws-ecr@8.2.1
   aws-ecs: circleci/aws-ecs@0.0.22
 
-jobs:
-  replace-serect:
-    docker:
-      - image: golang:latest # Use the appropriate Go version.
-    steps:
-      - checkout  # Check out your source code.
-      - run:
-          name: Replace serect in .env
-          command: |  # Replace {ENV_MONGO_DB_PASSWORD} with the value of DB_PASSWORD
-            sed -i "s/{ENV_MONGO_DB_PASSWORD}/${ENV_MONGO_DB_PASSWORD}/" .env  
-            cat .env
-            
 workflows:
   build_and_push_image:
     jobs:
-      - replace-serect
       - aws-ecr/build-and-push-image:
           context: aws-dev # config in circle context page
           create-repo: true

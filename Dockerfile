@@ -3,10 +3,9 @@ FROM golang:latest as builder
 
 WORKDIR /build
 
-# Copy the entire application and .env file
 COPY . /build/
-RUN echo "this is .env in /build: "
-RUN cat /build/.env
+
+RUN sed -i "s/{ENV_MONGO_DB_PASSWORD}/$ENV_MONGO_DB_PASSWORD/" /build/.env
 RUN go get -d -v ./...
 RUN CGO_ENABLED=0 go build -a -installsuffix cgo --ldflags "-s -w" -o /build/ims
 
