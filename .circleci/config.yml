@@ -16,6 +16,7 @@ jobs:
             DB_PASSWORD: "{$ENV_MONGO_DB_PASSWORD}"  # Access the environment variable
           command: |  # Replace {ENV_MONGO_DB_PASSWORD} with the value of DB_PASSWORD
             sed -i "s/{ENV_MONGO_DB_PASSWORD}/${DB_PASSWORD}/" .env  
+            cat .env
             
 workflows:
   build_and_push_image:
