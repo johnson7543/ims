@@ -5,6 +5,7 @@ WORKDIR /build
 
 COPY . /build/
 
+ARG ENV_MONGO_DB_PASSWORD
 RUN sed -i "s/{ENV_MONGO_DB_PASSWORD}/$ENV_MONGO_DB_PASSWORD/" /build/.env
 RUN go get -d -v ./...
 RUN CGO_ENABLED=0 go build -a -installsuffix cgo --ldflags "-s -w" -o /build/ims
