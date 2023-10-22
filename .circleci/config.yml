@@ -7,12 +7,16 @@ orbs:
 jobs:
   build:
     docker:
-      - image: alpine:latest
-    environment: 
-      DB_PASSWORD: ${MONGO_DB_PASSWORD}
+      - image: golang:latest # Use the appropriate Go version.
     steps:
-      - run: sh -c env
-
+      - checkout  # Check out your source code.
+      - run:
+          name: Replace serect in .env
+          environment:
+            DB_PASSWORD: "{$ENV_MONGO_DB_PASSWORD}"  # Access the environment variable
+          command: |  # Replace {ENV_MONGO_DB_PASSWORD} with the value of DB_PASSWORD
+            sed -i "s/{ENV_MONGO_DB_PASSWORD}/${DB_PASSWORD}/" .env  
+            
 workflows:
   build_and_push_image:
     jobs:
