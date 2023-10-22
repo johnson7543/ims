@@ -13,7 +13,7 @@ jobs:
       - run:
           name: Replace serect in .env
           environment:
-            DB_PASSWORD: "{$ENV_MONGO_DB_PASSWORD}"  # Access the environment variable
+            DB_PASSWORD: "${ENV_MONGO_DB_PASSWORD}"  # Access the environment variable
           command: |  # Replace {ENV_MONGO_DB_PASSWORD} with the value of DB_PASSWORD
             echo "DB_PASSWORD: ${DB_PASSWORD}"
             sed -i "s/{ENV_MONGO_DB_PASSWORD}/${DB_PASSWORD}/" .env  
@@ -22,7 +22,7 @@ jobs:
 workflows:
   build_and_push_image:
     jobs:
-      - build
+      - build:
       - aws-ecr/build-and-push-image:
           context: aws-dev # config in circle context page
           create-repo: true
