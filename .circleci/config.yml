@@ -9,22 +9,24 @@ workflows:
   build-and-deploy:
     jobs:
       - aws-ecr/build_and_push_image:
+          context: aws-dev # config in circle context page
           auth:
             - aws-cli/setup:
               profile: OIDC-USER
               role_arn: arn:aws:iam::248679804578:role/ecsServiceRole
-          context: aws-dev # config in circle context page
           create_repo: true
           dockerfile: Dockerfile
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           tag: "${CIRCLE_SHA1}"
           extra_build_args: "--build-arg ENV_MONGO_DB_PASSWORD=${ENV_MONGO_DB_PASSWORD}"
       - aws-ecs/deploy_service_update:
+          context: aws-dev
           auth:
             - aws-cli/setup:
+                region: ${AWS_REGION}
                 role_arn: arn:aws:iam::248679804578:role/ecsServiceRole
                 role_session_name: ims-session
-          cluster: ${AWS_RESOURCE_NAME_PREFIX}-cluster
+          cluster: -cluster
           container_image_name_updates: container=${AWS_RESOURCE_NAME_PREFIX}-service,tag=${CIRCLE_SHA1}
           family: ${AWS_RESOURCE_NAME_PREFIX}-service
           requires:
