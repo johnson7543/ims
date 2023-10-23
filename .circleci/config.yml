@@ -21,7 +21,7 @@ workflows:
           extra_build_args: "--build-arg ENV_MONGO_DB_PASSWORD=${ENV_MONGO_DB_PASSWORD}"
       - aws-ecs/deploy-service-update:
           requires:
-            - aws-ecr/build-and-push-image
+            - aws-ecr/build_and_push_image
           aws-region: ${AWS_DEFAULT_REGION}
           family: '${AWS_RESOURCE_NAME_PREFIX}-service'
           cluster-name: '${AWS_RESOURCE_NAME_PREFIX}-cluster'
