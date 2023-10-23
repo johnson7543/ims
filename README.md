@@ -59,7 +59,9 @@ sudo pkill -f ims-app
 # login in docker with AWS
 aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 248679804578.dkr.ecr.ap-northeast-1.amazonaws.com
 
+# build image
 docker build -t ims-ecs:v1 .
+docker build -t ims-ecs:v1 --build-arg ENV_MONGO_DB_PASSWORD=root . 
 docker tag ims-ecs:v1 248679804578.dkr.ecr.ap-northeast-1.amazonaws.com/ims:latest
 docker push 248679804578.dkr.ecr.ap-northeast-1.amazonaws.com/ims:latest
 
