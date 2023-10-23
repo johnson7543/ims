@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  aws-cli: circleci/aws-cli@4.0
+  aws-cli: circleci/aws-cli@4.1.1
   aws-ecr: circleci/aws-ecr@9.0
   aws-ecs: circleci/aws-ecs@4.0
 
@@ -25,10 +25,6 @@ workflows:
             - aws-cli/setup:
                 role_arn: arn:aws:iam::248679804578:role/Circleci_orbs_cli_ecr_ecs_role
                 role_session_name: ims-session
-            - aws-ecs/update_task_definition_from_json:
-                task_definition_json: task-definition.json
-            - aws-ecs/deploy_ecs_scheduled_task:
-                rule_name: ecs-service.json
           cluster: ${AWS_RESOURCE_NAME_PREFIX}-cluster
           container_image_name_updates: container=${AWS_RESOURCE_NAME_PREFIX}-service,tag=${CIRCLE_SHA1}
           family: ${AWS_RESOURCE_NAME_PREFIX}-service
