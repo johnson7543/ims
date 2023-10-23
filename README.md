@@ -28,19 +28,21 @@ MONGO_DB_URL=
 
 #### Installing swaggo
 
-```
+```bash
 go get -u github.com/swaggo/swag/cmd/swag
 ```
 
 #### Generating swagger docs
 
-```
+```bash
 swag init --parseDependency --parseInternal
 ```
 
-### Run the Server
+### Run the App
 
-#### Start/Stop the server
+#### Start/Stop
+
+##### if you are not using container to run the app
 
 ```bash
 sudo systemctl daemon-reload
