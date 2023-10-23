@@ -65,6 +65,13 @@ docker push 248679804578.dkr.ecr.ap-northeast-1.amazonaws.com/ims:latest
 docker run --name ims-local -p 8080:8080 ims-ecs:v1
 ```
 
+#### Circle CI reference
+
+<https://circleci.com/blog/use-circleci-orbs-to-build-test-and-deploy-a-simple-go-application-to-aws-ecs/>
+<https://circleci.com/developer/orbs/orb/circleci/aws-ecr#usage-simple_build_and_push>
+<https://circleci.com/developer/orbs/orb/circleci/aws-ecs#usage-deploy_service_update>
+<https://circleci.com/docs/openid-connect-tokens/>
+
 #### Some AWS cmd
 
 ```bash
