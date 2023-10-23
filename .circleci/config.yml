@@ -3,7 +3,7 @@ version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@4.0
   aws-ecr: circleci/aws-ecr@9.0
-  aws-ecs: circleci/aws-ecs@0.0.22
+  aws-ecs: circleci/aws-ecs@4.0
 
 workflows:
   build-and-deploy:
@@ -12,19 +12,22 @@ workflows:
           context: aws-dev # config in circle context page
           auth:
             - aws-cli/setup:
-              profile: OIDC-USER
-              role_arn: arn:aws:iam::248679804578:role/ecsServiceRole
+                role_arn: arn:aws:iam::248679804578:role/Circleci_orbs_cli_ecr_ecs_role
+                role_session_name: ims-session
           create_repo: true
           dockerfile: Dockerfile
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           tag: "${CIRCLE_SHA1}"
           extra_build_args: "--build-arg ENV_MONGO_DB_PASSWORD=${ENV_MONGO_DB_PASSWORD}"
-      - aws-ecs/deploy-service-update:
+      - aws-ecs/deploy_service_update:
+          context: aws-dev
+          auth:
+            - aws-cli/setup:
+                role_arn: arn:aws:iam::248679804578:role/Circleci_orbs_cli_ecr_ecs_role
+                role_session_name: ims-session
+          cluster: ${AWS_RESOURCE_NAME_PREFIX}-cluster
+          container_image_name_updates: container=${AWS_RESOURCE_NAME_PREFIX}-service,tag=${CIRCLE_SHA1}
+          family: ${AWS_RESOURCE_NAME_PREFIX}-service
           requires:
             - aws-ecr/build_and_push_image
-          aws-region: ${AWS_DEFAULT_REGION}
-          family: '${AWS_RESOURCE_NAME_PREFIX}-service'
-          cluster-name: '${AWS_RESOURCE_NAME_PREFIX}-cluster'
-          container-image-name-updates: 'container=${AWS_RESOURCE_NAME_PREFIX}-service,tag=${CIRCLE_SHA1}'
-
 
