@@ -70,6 +70,8 @@ docker run --name ims-local -p 8080:8080 ims-ecs:v1
 #### Circle CI reference
 
 <https://circleci.com/blog/use-circleci-orbs-to-build-test-and-deploy-a-simple-go-application-to-aws-ecs/>
+<https://github.com/CircleCI-Public/aws-ecr-orb/blob/master/src/commands/build_and_push_image.yml>
+<https://github.com/CircleCI-Public/aws-ecs-orb/blob/master/src/commands/update_service.yml>
 <https://circleci.com/developer/orbs/orb/circleci/aws-ecr#usage-simple_build_and_push>
 <https://circleci.com/developer/orbs/orb/circleci/aws-ecs#usage-deploy_service_update>
 <https://circleci.com/docs/openid-connect-tokens/>
