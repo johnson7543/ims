@@ -13,7 +13,6 @@ workflows:
           auth:
             - aws-cli/setup:
                 role_arn: arn:aws:iam::248679804578:role/Circleci_orbs_cli_ecr_ecs_role
-                role_session_name: ims-session
           create_repo: true
           dockerfile: Dockerfile
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
@@ -24,7 +23,6 @@ workflows:
           auth:
             - aws-cli/setup:
                 role_arn: arn:aws:iam::248679804578:role/Circleci_orbs_cli_ecr_ecs_role
-                role_session_name: ims-session
           cluster: ${AWS_RESOURCE_NAME_PREFIX}-cluster
           container_image_name_updates: container=${AWS_RESOURCE_NAME_PREFIX}-service,tag=${CIRCLE_SHA1}
           family: ${AWS_RESOURCE_NAME_PREFIX}-service
