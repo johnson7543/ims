@@ -24,6 +24,19 @@ func (p InsertMaterialParams) validate() error {
 	return nil
 }
 
+type UpdateMaterialParams struct {
+	Name     string `json:"name"`
+	Color    string `json:"color"`
+	Size     string `json:"size"`
+	Quantity string `json:"quantity"`
+	Remarks  string `json:"remarks"`
+}
+
+func (p UpdateMaterialParams) validate() error {
+
+	return nil
+}
+
 type MaterialHandler struct {
 	store *db.Store
 }
@@ -134,6 +147,55 @@ func (h *MaterialHandler) HandleInsertMaterial(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(inserted)
+}
+
+// HandleUpdateMaterial updates an existing material in the system.
+// @Summary Update material
+// @Description Update an existing material in the system.
+// @Tags Material
+// @Accept json
+// @Produce json
+// @Param id path string true "Material ID"
+// @Param body body UpdateMaterialParams true "Updated material details"
+// @Success 200 {object} fiber.Map
+// @Router /material/{id} [patch]
+func (h *MaterialHandler) HandleUpdateMaterial(c *fiber.Ctx) error {
+	id := c.Params("id")
+	materialID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	var params UpdateMaterialParams
+	if err := c.BodyParser(&params); err != nil {
+		return err
+	}
+
+	if err := params.validate(); err != nil {
+		return err
+	}
+
+	updatedMaterial := types.Material{
+		Name:     params.Name,
+		Color:    params.Color,
+		Size:     params.Size,
+		Quantity: params.Quantity,
+		Remarks:  params.Remarks,
+	}
+
+	updateCount, err := h.store.Material.UpdateMaterial(c.Context(), materialID, &updatedMaterial)
+	if err != nil {
+		return err
+	}
+
+	if updateCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Material not found",
+		})
+	}
+	return c.JSON(fiber.Map{
+		"message": "Material updaated successfully",
+	})
 }
 
 // HandleDeleteMaterial deletes a material from the system.

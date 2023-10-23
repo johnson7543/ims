@@ -12,28 +12,54 @@ import (
 )
 
 type InsertOrderParams struct {
-	CustomerID      string            `json:"customerId"`
-	OrderDate       string            `json:"orderDate"`
-	DeliveryDate    string            `json:"deliveryDate"`
-	PaymentDate     string            `json:"paymentDate"`
-	TotalAmount     float64           `json:"totalAmount"`
-	Status          string            `json:"status"`
-	ShippingAddress string            `json:"shippingAddress"`
-	OrderItems      []OrderItemParams `json:"orderItems"`
+	CustomerID      string                  `json:"customerId"`
+	OrderDate       string                  `json:"orderDate"`
+	DeliveryDate    string                  `json:"deliveryDate"`
+	PaymentDate     string                  `json:"paymentDate"`
+	TotalAmount     float64                 `json:"totalAmount"`
+	Status          string                  `json:"status"`
+	ShippingAddress string                  `json:"shippingAddress"`
+	OrderItems      []InsertOrderItemParams `json:"orderItems"`
 }
 
-type OrderItemParams struct {
-	Product    OrderProductParams `json:"product"`
-	Quantity   int                `json:"quantity"`
-	TotalPrice float64            `json:"totalPrice"`
+type InsertOrderItemParams struct {
+	Product    InsertOrderProductParams `json:"product"`
+	Quantity   int                      `json:"quantity"`
+	TotalPrice float64                  `json:"totalPrice"`
 }
 
-type OrderProductParams struct {
+type InsertOrderProductParams struct {
 	SKU       string  `json:"sku"`
 	UnitPrice float64 `json:"unitPrice"`
 }
 
 func (p InsertOrderParams) validate() error {
+	return nil
+}
+
+type UpdateOrderParams struct {
+	CustomerID      string                  `json:"customerId"`
+	OrderDate       string                  `json:"orderDate"`
+	DeliveryDate    string                  `json:"deliveryDate"`
+	PaymentDate     string                  `json:"paymentDate"`
+	TotalAmount     float64                 `json:"totalAmount"`
+	Status          string                  `json:"status"`
+	ShippingAddress string                  `json:"shippingAddress"`
+	OrderItems      []UpdateOrderItemParams `json:"orderItems"`
+}
+
+type UpdateOrderItemParams struct {
+	Product    UpdateOrderProductParams `json:"product"`
+	Quantity   int                      `json:"quantity"`
+	TotalPrice float64                  `json:"totalPrice"`
+}
+
+type UpdateOrderProductParams struct {
+	SKU       string  `json:"sku"`
+	UnitPrice float64 `json:"unitPrice"`
+}
+
+func (p UpdateOrderParams) validate() error {
 	return nil
 }
 
@@ -186,6 +212,106 @@ func (h *OrderHandler) HandleInsertOrder(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(inserted)
+}
+
+// HandleUpdateOrder updates an existing order in the system.
+// @Summary Update order
+// @Description Update an existing order in the system.
+// @Tags Order
+// @Accept json
+// @Produce json
+// @Param id path string true "Order ID"
+// @Param body body UpdateOrderParams true "Updated order details"
+// @Success 200 {object} fiber.Map
+// @Router /order/{id} [patch]
+func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
+	id := c.Params("id")
+	orderID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	var params UpdateOrderParams
+	if err := c.BodyParser(&params); err != nil {
+		return err
+	}
+
+	if err := params.validate(); err != nil {
+		return err
+	}
+
+	customerID, err := primitive.ObjectIDFromHex(params.CustomerID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid customer ID",
+		})
+	}
+
+	orderDateParsed, err := time.Parse("2006-01-02", params.OrderDate)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid order date format",
+		})
+	}
+
+	deliveryDateParsed, err := time.Parse("2006-01-02", params.DeliveryDate)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid delivery date format",
+		})
+	}
+
+	paymentDateParsed, err := time.Parse("2006-01-02", params.PaymentDate)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid payment date format",
+		})
+	}
+
+	orderItems := make([]types.OrderItem, len(params.OrderItems))
+	for i, item := range params.OrderItems {
+		productID, err := primitive.ObjectIDFromHex(item.Product.SKU)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid product ID",
+			})
+		}
+
+		orderItems[i] = types.OrderItem{
+			Product: types.OrderProduct{
+				SKU:       productID,
+				UnitPrice: item.Product.UnitPrice,
+			},
+			Quantity:   item.Quantity,
+			TotalPrice: item.TotalPrice,
+		}
+	}
+
+	updatedOrder := types.Order{
+		CustomerID:      customerID,
+		OrderDate:       orderDateParsed,
+		DeliveryDate:    deliveryDateParsed,
+		PaymentDate:     paymentDateParsed,
+		TotalAmount:     params.TotalAmount,
+		Status:          params.Status,
+		ShippingAddress: params.ShippingAddress,
+		OrderItems:      orderItems,
+	}
+
+	updateCount, err := h.store.Order.UpdateOrder(c.Context(), orderID, &updatedOrder)
+	if err != nil {
+		return err
+	}
+
+	if updateCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Order not found",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Order updated successfully",
+	})
 }
 
 // HandleDeleteOrder deletes an order by ID.

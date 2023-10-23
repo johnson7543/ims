@@ -28,6 +28,23 @@ func (p InsertProcessingItemParams) validate() error {
 	return nil
 }
 
+type UpdateProcessingItemParams struct {
+	Name      string  `json:"name"`
+	Quantity  int     `json:"quantity"`
+	Price     float64 `json:"price"`
+	WorkerID  string  `json:"workerId"`
+	StartDate string  `json:"start_date"`
+	EndDate   string  `json:"end_date"`
+	SKU       string  `json:"sku"`
+	Remarks   string  `json:"remarks"`
+}
+
+func (p *UpdateProcessingItemParams) validate() error {
+	// You can add validation logic here if needed.
+	// For example, validate that the date formats are correct.
+	return nil
+}
+
 type ProcessingItemHandler struct {
 	store *db.Store
 }
@@ -228,6 +245,96 @@ func (h *ProcessingItemHandler) HandleInsertProcessingItem(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(inserted)
+}
+
+// HandleUpdateProcessingItem updates an existing processing item in the system.
+//
+// @Summary Update processing item
+// @Description Update an existing processing item in the system.
+// @Tags Processing Item
+// @Accept json
+// @Produce json
+// @Param id path string true "Processing Item ID"
+// @Param body body UpdateProcessingItemParams true "Updated processing item details"
+// @Success 200 {object} fiber.Map
+// @Router /processingItem/{id} [patch]
+func (h *ProcessingItemHandler) HandleUpdateProcessingItem(c *fiber.Ctx) error {
+	id := c.Params("id")
+	processingItemID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid Processing Item ID",
+		})
+	}
+
+	var params UpdateProcessingItemParams
+	if err := c.BodyParser(&params); err != nil {
+		return err
+	}
+
+	if err := params.validate(); err != nil {
+		return err
+	}
+
+	workerID, err := primitive.ObjectIDFromHex(params.WorkerID)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid worker ID",
+		})
+	}
+
+	updatedProcessingItem := types.ProcessingItem{
+		Name:     params.Name,
+		Quantity: params.Quantity,
+		Price:    params.Price,
+		WorkerID: workerID,
+		Remarks:  params.Remarks,
+	}
+
+	if params.StartDate != "" {
+		startDateParsed, err := time.Parse("2006-01-02", params.StartDate)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid start date format",
+			})
+		}
+		updatedProcessingItem.StartDate = startDateParsed
+	}
+
+	if params.EndDate != "" {
+		endDateParsed, err := time.Parse("2006-01-02", params.EndDate)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid end date format",
+			})
+		}
+		updatedProcessingItem.EndDate = endDateParsed
+	}
+
+	if params.SKU != "" {
+		productID, err := primitive.ObjectIDFromHex(params.SKU)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid product ID",
+			})
+		}
+		updatedProcessingItem.SKU = productID
+	}
+
+	updateCount, err := h.store.ProcessingItem.UpdateProcessingItem(c.Context(), processingItemID, &updatedProcessingItem)
+	if err != nil {
+		return err
+	}
+
+	if updateCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Processing Item not found",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Processing Item updated successfully",
+	})
 }
 
 // HandleDeleteProcessingItem deletes a processing item by ID.

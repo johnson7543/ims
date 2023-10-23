@@ -14,8 +14,9 @@ import (
 const orderColl = "orders"
 
 type OrderStore interface {
-	InsertOrder(ctx context.Context, order *types.Order) (*types.Order, error)
 	GetOrders(ctx context.Context, filter bson.M) ([]*types.Order, error)
+	InsertOrder(ctx context.Context, order *types.Order) (*types.Order, error)
+	UpdateOrder(ctx context.Context, orderID primitive.ObjectID, updatedOrder *types.Order) (int64, error)
 	DeleteOrder(ctx context.Context, id primitive.ObjectID) (int64, error)
 }
 
@@ -30,16 +31,6 @@ func NewMongoOrderStore(client *mongo.Client) *MongoOrderStore {
 		client: client,
 		coll:   client.Database(dbname).Collection(orderColl),
 	}
-}
-
-func (s *MongoOrderStore) InsertOrder(ctx context.Context, order *types.Order) (*types.Order, error) {
-	resp, err := s.coll.InsertOne(ctx, order)
-	if err != nil {
-		return nil, err
-	}
-	order.ID = resp.InsertedID.(primitive.ObjectID)
-
-	return order, nil
 }
 
 func (s *MongoOrderStore) GetOrders(ctx context.Context, filter bson.M) ([]*types.Order, error) {
@@ -63,6 +54,35 @@ func (s *MongoOrderStore) GetOrders(ctx context.Context, filter bson.M) ([]*type
 	}
 
 	return orders, nil
+}
+
+func (s *MongoOrderStore) InsertOrder(ctx context.Context, order *types.Order) (*types.Order, error) {
+	resp, err := s.coll.InsertOne(ctx, order)
+	if err != nil {
+		return nil, err
+	}
+	order.ID = resp.InsertedID.(primitive.ObjectID)
+
+	return order, nil
+}
+
+func (s *MongoOrderStore) UpdateOrder(ctx context.Context, orderID primitive.ObjectID, updatedOrder *types.Order) (int64, error) {
+	filter := bson.M{"_id": orderID}
+	update := bson.M{
+		"$set": bson.M{
+			"totalAmount":     updatedOrder.TotalAmount,
+			"status":          updatedOrder.Status,
+			"shippingAddress": updatedOrder.ShippingAddress,
+			"orderItems":      updatedOrder.OrderItems,
+		},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
 }
 
 func (s *MongoOrderStore) DeleteOrder(ctx context.Context, id primitive.ObjectID) (int64, error) {

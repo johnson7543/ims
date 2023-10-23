@@ -226,6 +226,45 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "Update an existing material in the system.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Material"
+                ],
+                "summary": "Update material",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Material ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated material details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateMaterialParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/fiber.Map"
+                        }
+                    }
+                }
             }
         },
         "/order": {
@@ -320,6 +359,45 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/fiber.Map"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update an existing order in the system.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order"
+                ],
+                "summary": "Update order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated order details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateOrderParams"
+                        }
                     }
                 ],
                 "responses": {
@@ -470,6 +548,45 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "Update an existing processing item in the system.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Processing Item"
+                ],
+                "summary": "Update processing item",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Processing Item ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated processing item details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateProcessingItemParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/fiber.Map"
+                        }
+                    }
+                }
             }
         },
         "/product": {
@@ -610,6 +727,45 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "Update an existing product in the system.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Update product",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated product details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateProductParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/fiber.Map"
+                        }
+                    }
+                }
             }
         },
         "/worker": {
@@ -732,6 +888,45 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "patch": {
+                "description": "Update an existing worker in the system.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Worker"
+                ],
+                "summary": "Update worker",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Worker ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated worker details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateWorkerParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/fiber.Map"
+                        }
+                    }
+                }
             }
         }
     },
@@ -778,6 +973,20 @@ const docTemplate = `{
                 }
             }
         },
+        "api.InsertOrderItemParams": {
+            "type": "object",
+            "properties": {
+                "product": {
+                    "$ref": "#/definitions/api.InsertOrderProductParams"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
         "api.InsertOrderParams": {
             "type": "object",
             "properties": {
@@ -793,7 +1002,7 @@ const docTemplate = `{
                 "orderItems": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/api.OrderItemParams"
+                        "$ref": "#/definitions/api.InsertOrderItemParams"
                     }
                 },
                 "paymentDate": {
@@ -806,6 +1015,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "totalAmount": {
+                    "type": "number"
+                }
+            }
+        },
+        "api.InsertOrderProductParams": {
+            "type": "object",
+            "properties": {
+                "sku": {
+                    "type": "string"
+                },
+                "unitPrice": {
                     "type": "number"
                 }
             }
@@ -888,11 +1108,31 @@ const docTemplate = `{
                 }
             }
         },
-        "api.OrderItemParams": {
+        "api.UpdateMaterialParams": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "string"
+                },
+                "remarks": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.UpdateOrderItemParams": {
             "type": "object",
             "properties": {
                 "product": {
-                    "$ref": "#/definitions/api.OrderProductParams"
+                    "$ref": "#/definitions/api.UpdateOrderProductParams"
                 },
                 "quantity": {
                     "type": "integer"
@@ -902,7 +1142,39 @@ const docTemplate = `{
                 }
             }
         },
-        "api.OrderProductParams": {
+        "api.UpdateOrderParams": {
+            "type": "object",
+            "properties": {
+                "customerId": {
+                    "type": "string"
+                },
+                "deliveryDate": {
+                    "type": "string"
+                },
+                "orderDate": {
+                    "type": "string"
+                },
+                "orderItems": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.UpdateOrderItemParams"
+                    }
+                },
+                "paymentDate": {
+                    "type": "string"
+                },
+                "shippingAddress": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "totalAmount": {
+                    "type": "number"
+                }
+            }
+        },
+        "api.UpdateOrderProductParams": {
             "type": "object",
             "properties": {
                 "sku": {
@@ -910,6 +1182,84 @@ const docTemplate = `{
                 },
                 "unitPrice": {
                     "type": "number"
+                }
+            }
+        },
+        "api.UpdateProcessingItemParams": {
+            "type": "object",
+            "properties": {
+                "end_date": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "remarks": {
+                    "type": "string"
+                },
+                "sku": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "workerId": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.UpdateProductParams": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "material": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "remark": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.UpdateWorkerParams": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "company": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "taxIdNumber": {
+                    "type": "string"
                 }
             }
         },

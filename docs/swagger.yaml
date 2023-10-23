@@ -27,6 +27,15 @@ definitions:
       size:
         type: string
     type: object
+  api.InsertOrderItemParams:
+    properties:
+      product:
+        $ref: '#/definitions/api.InsertOrderProductParams'
+      quantity:
+        type: integer
+      totalPrice:
+        type: number
+    type: object
   api.InsertOrderParams:
     properties:
       customerId:
@@ -37,7 +46,7 @@ definitions:
         type: string
       orderItems:
         items:
-          $ref: '#/definitions/api.OrderItemParams'
+          $ref: '#/definitions/api.InsertOrderItemParams'
         type: array
       paymentDate:
         type: string
@@ -46,6 +55,13 @@ definitions:
       status:
         type: string
       totalAmount:
+        type: number
+    type: object
+  api.InsertOrderProductParams:
+    properties:
+      sku:
+        type: string
+      unitPrice:
         type: number
     type: object
   api.InsertProcessingItemParams:
@@ -99,21 +115,106 @@ definitions:
       taxIdNumber:
         type: string
     type: object
-  api.OrderItemParams:
+  api.UpdateMaterialParams:
+    properties:
+      color:
+        type: string
+      name:
+        type: string
+      quantity:
+        type: string
+      remarks:
+        type: string
+      size:
+        type: string
+    type: object
+  api.UpdateOrderItemParams:
     properties:
       product:
-        $ref: '#/definitions/api.OrderProductParams'
+        $ref: '#/definitions/api.UpdateOrderProductParams'
       quantity:
         type: integer
       totalPrice:
         type: number
     type: object
-  api.OrderProductParams:
+  api.UpdateOrderParams:
+    properties:
+      customerId:
+        type: string
+      deliveryDate:
+        type: string
+      orderDate:
+        type: string
+      orderItems:
+        items:
+          $ref: '#/definitions/api.UpdateOrderItemParams'
+        type: array
+      paymentDate:
+        type: string
+      shippingAddress:
+        type: string
+      status:
+        type: string
+      totalAmount:
+        type: number
+    type: object
+  api.UpdateOrderProductParams:
     properties:
       sku:
         type: string
       unitPrice:
         type: number
+    type: object
+  api.UpdateProcessingItemParams:
+    properties:
+      end_date:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      remarks:
+        type: string
+      sku:
+        type: string
+      start_date:
+        type: string
+      workerId:
+        type: string
+    type: object
+  api.UpdateProductParams:
+    properties:
+      color:
+        type: string
+      date:
+        type: string
+      material:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      remark:
+        type: string
+      size:
+        type: string
+    type: object
+  api.UpdateWorkerParams:
+    properties:
+      address:
+        type: string
+      company:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      taxIdNumber:
+        type: string
     type: object
   api.genericResp:
     properties:
@@ -366,6 +467,32 @@ paths:
       summary: Delete material
       tags:
       - Material
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing material in the system.
+      parameters:
+      - description: Material ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated material details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateMaterialParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      summary: Update material
+      tags:
+      - Material
   /material/colors:
     get:
       description: Get a list of unique material colors.
@@ -464,6 +591,32 @@ paths:
       summary: Delete order
       tags:
       - Order
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing order in the system.
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated order details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateOrderParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      summary: Update order
+      tags:
+      - Order
   /processingItem:
     get:
       description: Retrieves a list of processing items based on query parameters.
@@ -554,6 +707,32 @@ paths:
           schema:
             $ref: '#/definitions/fiber.Map'
       summary: Delete processing item
+      tags:
+      - Processing Item
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing processing item in the system.
+      parameters:
+      - description: Processing Item ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated processing item details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateProcessingItemParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      summary: Update processing item
       tags:
       - Processing Item
   /product:
@@ -648,6 +827,32 @@ paths:
       summary: Delete product
       tags:
       - Product
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing product in the system.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated product details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateProductParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      summary: Update product
+      tags:
+      - Product
   /worker:
     get:
       description: Retrieves a list of workers based on query parameters.
@@ -726,6 +931,32 @@ paths:
           schema:
             $ref: '#/definitions/fiber.Map'
       summary: Delete worker
+      tags:
+      - Worker
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing worker in the system.
+      parameters:
+      - description: Worker ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated worker details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateWorkerParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      summary: Update worker
       tags:
       - Worker
 swagger: "2.0"

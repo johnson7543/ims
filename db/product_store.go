@@ -14,8 +14,9 @@ import (
 const productColl = "products"
 
 type ProductStore interface {
-	InsertProduct(context.Context, *types.Product) (*types.Product, error)
 	GetProducts(context.Context, bson.M) ([]*types.Product, error)
+	InsertProduct(context.Context, *types.Product) (*types.Product, error)
+	UpdateProduct(ctx context.Context, productID primitive.ObjectID, updatedProduct *types.Product) (int64, error)
 	DeleteProduct(ctx context.Context, id primitive.ObjectID) (int64, error)
 	GetProductColors(ctx context.Context) ([]string, error)
 	GetProductSizes(ctx context.Context) ([]string, error)
@@ -65,6 +66,29 @@ func (s *MongoProductStore) InsertProduct(ctx context.Context, product *types.Pr
 	product.ID = resp.InsertedID.(primitive.ObjectID)
 
 	return product, nil
+}
+
+func (s *MongoProductStore) UpdateProduct(ctx context.Context, productID primitive.ObjectID, updatedProduct *types.Product) (int64, error) {
+	filter := bson.M{"_id": productID}
+	update := bson.M{
+		"$set": bson.M{
+			"name":     updatedProduct.Name,
+			"material": updatedProduct.Material,
+			"color":    updatedProduct.Color,
+			"size":     updatedProduct.Size,
+			"quantity": updatedProduct.Quantity,
+			"price":    updatedProduct.Price,
+			"date":     updatedProduct.Date,
+			"remark":   updatedProduct.Remark,
+		},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
 }
 
 func (s *MongoProductStore) DeleteProduct(ctx context.Context, id primitive.ObjectID) (int64, error) {

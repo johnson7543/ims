@@ -65,35 +65,42 @@ func main() {
 		productHandler        = api.NewProductHandler(store)
 		orderHandler          = api.NewOrderHandler(store)
 		app                   = fiber.New(config)
+		homePage              = app.Group("/")
 		healthCheck           = app.Group("/health")
 		auth                  = app.Group("/api")
 		apiv1                 = app.Group("/api/v1", api.JWTAuthentication(userStore))
 	)
 
+	homePage.Get("/", HealthCheckHandler.HandleHealthCheck)
 	healthCheck.Get("/", HealthCheckHandler.HandleHealthCheck)
 
 	auth.Post("/auth", authHandler.HandleAuthenticate)
 
 	apiv1.Get("/material", materialHandler.HandleGetMaterials)
 	apiv1.Post("/material", materialHandler.HandleInsertMaterial)
+	apiv1.Patch("/material/:id", materialHandler.HandleUpdateMaterial)
 	apiv1.Delete("/material/:id", materialHandler.HandleDeleteMaterial)
 	apiv1.Get("/material/colors", materialHandler.HandleGetMaterialColors)
 	apiv1.Get("/material/sizes", materialHandler.HandleGetMaterialSizes)
 
 	apiv1.Get("/worker", workerHandler.HandleGetWorkers)
 	apiv1.Post("/worker", workerHandler.HandleInsertWorker)
+	apiv1.Patch("/worker/:id", workerHandler.HandleUpdateWorker) // to-do handler
 	apiv1.Delete("/worker/:id", workerHandler.HandleDeleteWorker)
 
 	apiv1.Get("/processingItem", processingItemHandler.HandleGetProcessingItems)
 	apiv1.Post("/processingItem", processingItemHandler.HandleInsertProcessingItem)
+	apiv1.Patch("/processingItem/:id", processingItemHandler.HandleUpdateProcessingItem) // to-do handler
 	apiv1.Delete("/processingItem/:id", processingItemHandler.HandleDeleteProcessingItem)
 
 	apiv1.Get("/product", productHandler.HandleGetProducts)
 	apiv1.Post("/product", productHandler.HandleInsertProduct)
+	apiv1.Patch("/product/:id", productHandler.HandleUpdateProduct) // to-do handler
 	apiv1.Delete("/product/:id", productHandler.HandleDeleteProduct)
 
 	apiv1.Get("/order", orderHandler.HandleGetOrders)
 	apiv1.Post("/order", orderHandler.HandleInsertOrder)
+	apiv1.Patch("/order/:id", orderHandler.HandleUpdateOrder) // to-do handler
 	apiv1.Delete("/order/:id", orderHandler.HandleDeleteOrder)
 
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)

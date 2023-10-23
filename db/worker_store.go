@@ -14,8 +14,9 @@ import (
 const workerColl = "workers"
 
 type WorkerStore interface {
-	InsertWorker(context.Context, *types.Worker) (*types.Worker, error)
 	GetWorkers(context.Context, bson.M) ([]*types.Worker, error)
+	InsertWorker(context.Context, *types.Worker) (*types.Worker, error)
+	UpdateWorker(ctx context.Context, id primitive.ObjectID, updatedWorker *types.Worker) (int64, error)
 	DeleteWorker(ctx context.Context, id primitive.ObjectID) (int64, error)
 }
 
@@ -63,6 +64,26 @@ func (s *MongoWorkerStore) InsertWorker(ctx context.Context, worker *types.Worke
 	worker.ID = resp.InsertedID.(primitive.ObjectID)
 
 	return worker, nil
+}
+
+func (s *MongoWorkerStore) UpdateWorker(ctx context.Context, id primitive.ObjectID, updatedWorker *types.Worker) (int64, error) {
+	filter := bson.M{"_id": id}
+	update := bson.M{
+		"$set": bson.M{
+			"company":     updatedWorker.Company,
+			"name":        updatedWorker.Name,
+			"phone":       updatedWorker.Phone,
+			"address":     updatedWorker.Address,
+			"taxIdNumber": updatedWorker.TaxIdNumber,
+		},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
 }
 
 func (s *MongoWorkerStore) DeleteWorker(ctx context.Context, id primitive.ObjectID) (int64, error) {

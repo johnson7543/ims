@@ -21,6 +21,18 @@ func (p InsertWorkerParams) validate() error {
 	return nil
 }
 
+type UpdateWorkerParams struct {
+	Company     string `json:"company" form:"company"`
+	Name        string `json:"name" form:"name"`
+	Phone       string `json:"phone" form:"phone"`
+	Address     string `json:"address" form:"address"`
+	TaxIdNumber string `json:"taxIdNumber" form:"taxIdNumber"`
+}
+
+func (p *UpdateWorkerParams) validate() error {
+	return nil
+}
+
 type WorkerHandler struct {
 	store *db.Store
 }
@@ -121,6 +133,55 @@ func (h *WorkerHandler) HandleInsertWorker(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(inserted)
+}
+
+// HandleUpdateWorker updates an existing worker in the system.
+// @Summary Update worker
+// @Description Update an existing worker in the system.
+// @Tags Worker
+// @Accept json
+// @Produce json
+// @Param id path string true "Worker ID"
+// @Param body body UpdateWorkerParams true "Updated worker details"
+// @Success 200 {object} fiber.Map
+// @Router /worker/{id} [patch]
+func (h *WorkerHandler) HandleUpdateWorker(c *fiber.Ctx) error {
+	id := c.Params("id")
+	workerID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	var params UpdateWorkerParams
+	if err := c.BodyParser(&params); err != nil {
+		return err
+	}
+
+	if err := params.validate(); err != nil {
+		return err
+	}
+
+	updatedWorker := types.Worker{
+		Company:     params.Company,
+		Name:        params.Name,
+		Phone:       params.Phone,
+		Address:     params.Address,
+		TaxIdNumber: params.TaxIdNumber,
+	}
+
+	updateCount, err := h.store.Worker.UpdateWorker(c.Context(), workerID, &updatedWorker)
+	if err != nil {
+		return err
+	}
+
+	if updateCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Worker not found",
+		})
+	}
+	return c.JSON(fiber.Map{
+		"message": "Worker updated successfully",
+	})
 }
 
 // HandleDeleteWorker deletes a worker by ID.

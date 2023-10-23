@@ -14,8 +14,9 @@ import (
 const processingItemColl = "processing_items"
 
 type ProcessingItemStore interface {
-	InsertProcessingItem(context.Context, *types.ProcessingItem) (*types.ProcessingItem, error)
 	GetProcessingItems(context.Context, bson.M) ([]*types.ProcessingItem, error)
+	InsertProcessingItem(context.Context, *types.ProcessingItem) (*types.ProcessingItem, error)
+	UpdateProcessingItem(ctx context.Context, id primitive.ObjectID, updatedProcessingItem *types.ProcessingItem) (int64, error)
 	DeleteProcessingItem(ctx context.Context, id primitive.ObjectID) (int64, error)
 }
 
@@ -63,6 +64,29 @@ func (s *MongoProcessingItemStore) InsertProcessingItem(ctx context.Context, pro
 	processingItem.ID = resp.InsertedID.(primitive.ObjectID)
 
 	return processingItem, nil
+}
+
+func (s *MongoProcessingItemStore) UpdateProcessingItem(ctx context.Context, id primitive.ObjectID, updatedProcessingItem *types.ProcessingItem) (int64, error) {
+	filter := bson.M{"_id": id}
+	update := bson.M{
+		"$set": bson.M{
+			"name":      updatedProcessingItem.Name,
+			"quantity":  updatedProcessingItem.Quantity,
+			"price":     updatedProcessingItem.Price,
+			"workerID":  updatedProcessingItem.WorkerID,
+			"remarks":   updatedProcessingItem.Remarks,
+			"startDate": updatedProcessingItem.StartDate,
+			"endDate":   updatedProcessingItem.EndDate,
+			"SKU":       updatedProcessingItem.SKU,
+		},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
 }
 
 func (s *MongoProcessingItemStore) DeleteProcessingItem(ctx context.Context, id primitive.ObjectID) (int64, error) {

@@ -14,8 +14,9 @@ import (
 const materialColl = "materials"
 
 type MaterialStore interface {
-	InsertMaterial(context.Context, *types.Material) (*types.Material, error)
 	GetMaterials(context.Context, bson.M) ([]*types.Material, error)
+	InsertMaterial(context.Context, *types.Material) (*types.Material, error)
+	UpdateMaterial(ctx context.Context, materialID primitive.ObjectID, updates *types.Material) (int64, error)
 	DeleteMaterial(ctx context.Context, id primitive.ObjectID) (int64, error)
 	GetMaterialColors(ctx context.Context) ([]string, error)
 	GetMaterialSizes(ctx context.Context) ([]string, error)
@@ -65,6 +66,26 @@ func (s *MongoMaterialStore) InsertMaterial(ctx context.Context, material *types
 	material.ID = resp.InsertedID.(primitive.ObjectID)
 
 	return material, nil
+}
+
+func (s *MongoMaterialStore) UpdateMaterial(ctx context.Context, materialID primitive.ObjectID, updates *types.Material) (int64, error) {
+	filter := bson.M{"_id": materialID}
+	update := bson.M{
+		"$set": bson.M{
+			"name":     updates.Name,
+			"color":    updates.Color,
+			"size":     updates.Size,
+			"quantity": updates.Quantity,
+			"remarks":  updates.Remarks,
+		},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
 }
 
 func (s *MongoMaterialStore) DeleteMaterial(ctx context.Context, id primitive.ObjectID) (int64, error) {

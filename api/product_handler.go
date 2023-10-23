@@ -13,18 +13,33 @@ import (
 )
 
 type InsertProductParams struct {
-	Name     string    `json:"name"`
-	Material string    `json:"material"`
-	Color    string    `json:"color"`
-	Size     string    `json:"size"`
-	Quantity int       `json:"quantity"`
-	Price    float64   `json:"price"`
-	Date     time.Time `json:"date"`
-	Remark   string    `json:"remark"`
+	Name     string  `json:"name"`
+	Material string  `json:"material"`
+	Color    string  `json:"color"`
+	Size     string  `json:"size"`
+	Quantity int     `json:"quantity"`
+	Price    float64 `json:"price"`
+	Date     string  `json:"date"`
+	Remark   string  `json:"remark"`
 }
 
 func (p InsertProductParams) validate() error {
 	// Add validation logic if needed
+	return nil
+}
+
+type UpdateProductParams struct {
+	Name     string  `json:"name"`
+	Material string  `json:"material"`
+	Color    string  `json:"color"`
+	Size     string  `json:"size"`
+	Quantity int     `json:"quantity"`
+	Price    float64 `json:"price"`
+	Date     string  `json:"date"`
+	Remark   string  `json:"remark"`
+}
+
+func (p *UpdateProductParams) validate() error {
 	return nil
 }
 
@@ -155,8 +170,17 @@ func (h *ProductHandler) HandleInsertProduct(c *fiber.Ctx) error {
 		Size:     params.Size,
 		Quantity: params.Quantity,
 		Price:    params.Price,
-		Date:     params.Date,
 		Remark:   params.Remark,
+	}
+
+	if params.Date != "" {
+		dateParsed, err := time.Parse("2006-01-02", params.Date)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid start date format",
+			})
+		}
+		product.Date = dateParsed
 	}
 
 	inserted, err := h.store.Product.InsertProduct(c.Context(), &product)
@@ -164,6 +188,68 @@ func (h *ProductHandler) HandleInsertProduct(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(inserted)
+}
+
+// HandleUpdateProduct updates an existing product in the system.
+// @Summary Update product
+// @Description Update an existing product in the system.
+// @Tags Product
+// @Accept json
+// @Produce json
+// @Param id path string true "Product ID"
+// @Param body body UpdateProductParams true "Updated product details"
+// @Success 200 {object} fiber.Map
+// @Router /product/{id} [patch]
+func (h *ProductHandler) HandleUpdateProduct(c *fiber.Ctx) error {
+	id := c.Params("id")
+	productID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	var params UpdateProductParams
+	if err := c.BodyParser(&params); err != nil {
+		return err
+	}
+
+	if err := params.validate(); err != nil {
+		return err
+	}
+
+	updatedProduct := types.Product{
+		Name:     params.Name,
+		Material: params.Material,
+		Color:    params.Color,
+		Size:     params.Size,
+		Quantity: params.Quantity,
+		Price:    params.Price,
+		Remark:   params.Remark,
+	}
+
+	if params.Date != "" {
+		dateParsed, err := time.Parse("2006-01-02", params.Date)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid start date format",
+			})
+		}
+		updatedProduct.Date = dateParsed
+	}
+
+	updateCount, err := h.store.Product.UpdateProduct(c.Context(), productID, &updatedProduct)
+	if err != nil {
+		return err
+	}
+
+	if updateCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Product not found",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Product updated successfully",
+	})
 }
 
 // HandleDeleteProduct deletes a product by ID.
