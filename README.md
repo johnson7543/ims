@@ -32,26 +32,17 @@ MONGO_DB_URL=
 go get -u github.com/swaggo/swag/cmd/swag
 ```
 
-#### Generating swagger docs
+#### Generating Swagger docs
 
 ```bash
 swag init --parseDependency --parseInternal
 ```
 
+##### Swagger link
+
+<http://localhost:8080/swagger/index.html#/>
+
 ### Run the App
-
-#### Start/Stop
-
-##### if you are not using container to run the app
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl restart ims-app
-sudo systemctl status ims-app
-
-sudo systemctl stop ims-app
-sudo pkill -f ims-app
-```
 
 #### Run with Docker
 
