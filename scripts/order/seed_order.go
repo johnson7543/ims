@@ -51,6 +51,15 @@ func main() {
 		"653f2b14afc3a62643af2ab7",
 		"653f2b15afc3a62643af2ab8",
 	}
+
+	productSkuStrings := []string{
+		"SKU_1",
+		"SKU_2",
+		"SKU_3",
+		"SKU_4",
+		"SKU_5",
+	}
+
 	productIds := make([]primitive.ObjectID, len(productIdStrings))
 	for i, idStr := range productIdStrings {
 		sku, err := primitive.ObjectIDFromHex(idStr)
@@ -61,13 +70,19 @@ func main() {
 		productIds[i] = sku
 	}
 
+	productSkus := make([]string, len(productSkuStrings))
+	for i, skuStr := range productSkuStrings {
+		productSkus[i] = skuStr
+	}
+
 	for i := 1; i <= 5; i++ {
 
 		orderItems := make([]types.OrderItem, 0)
 
 		for j := 0; j < 3; j++ {
 			orderProduct := &types.OrderProduct{
-				SKU:       productIds[j],
+				ID:        productIds[j],
+				SKU:       productSkus[j],
 				UnitPrice: 10 + (10 * float64(j+1)),
 			}
 
