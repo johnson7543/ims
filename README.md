@@ -1,10 +1,11 @@
 # IMS
 
-## Project environment variables
+## Project environment variables setup
 
-.env file
-```
-HTTP_LISTEN_ADDRESS=:3333
+create .env file at root
+
+```bash
+HTTP_LISTEN_ADDRESS=:8080
 JWT_SECRET=
 MONGO_DB_NAME=
 MONGO_DB_URL=
