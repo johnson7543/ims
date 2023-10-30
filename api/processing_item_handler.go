@@ -125,7 +125,7 @@ func (h *ProcessingItemHandler) HandleGetProcessingItems(c *fiber.Ctx) error {
 		filter["workerId"] = objID
 	}
 	if startDate != "" {
-		startDateParsed, err := time.Parse("2006-01-02", startDate)
+		startDateParsed, err := time.Parse(time.RFC3339Nano, startDate)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid start date format",
@@ -133,7 +133,7 @@ func (h *ProcessingItemHandler) HandleGetProcessingItems(c *fiber.Ctx) error {
 		}
 		filter["startDate"] = startDateParsed
 		if endDate != "" {
-			endDateParsed, err := time.Parse("2006-01-02", endDate)
+			endDateParsed, err := time.Parse(time.RFC3339Nano, endDate)
 			if err != nil {
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 					"error": "Invalid end date format",
@@ -205,7 +205,7 @@ func (h *ProcessingItemHandler) HandleInsertProcessingItem(c *fiber.Ctx) error {
 	}
 
 	if params.StartDate != "" {
-		startDateParsed, err := time.Parse("2006-01-02", params.StartDate)
+		startDateParsed, err := time.Parse(time.RFC3339Nano, params.StartDate)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid start date format",
@@ -215,7 +215,7 @@ func (h *ProcessingItemHandler) HandleInsertProcessingItem(c *fiber.Ctx) error {
 	}
 
 	if params.EndDate != "" {
-		endDateParsed, err := time.Parse("2006-01-02", params.EndDate)
+		endDateParsed, err := time.Parse(time.RFC3339Nano, params.EndDate)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid end date format",
@@ -278,7 +278,7 @@ func (h *ProcessingItemHandler) HandleUpdateProcessingItem(c *fiber.Ctx) error {
 	}
 
 	if params.StartDate != "" {
-		startDateParsed, err := time.Parse("2006-01-02", params.StartDate)
+		startDateParsed, err := time.Parse(time.RFC3339Nano, params.StartDate)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid start date format",
@@ -288,7 +288,7 @@ func (h *ProcessingItemHandler) HandleUpdateProcessingItem(c *fiber.Ctx) error {
 	}
 
 	if params.EndDate != "" {
-		endDateParsed, err := time.Parse("2006-01-02", params.EndDate)
+		endDateParsed, err := time.Parse(time.RFC3339Nano, params.EndDate)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid end date format",

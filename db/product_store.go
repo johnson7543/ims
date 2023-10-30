@@ -20,6 +20,8 @@ type ProductStore interface {
 	DeleteProduct(ctx context.Context, id primitive.ObjectID) (int64, error)
 	GetProductColors(ctx context.Context) ([]string, error)
 	GetProductSizes(ctx context.Context) ([]string, error)
+	CheckExistedSKU(ctx context.Context, sku string) (bool, error)
+	CheckDuplicateSKU(ctx context.Context, sku string, productID primitive.ObjectID) (bool, error)
 }
 
 type MongoProductStore struct {
@@ -72,6 +74,7 @@ func (s *MongoProductStore) UpdateProduct(ctx context.Context, productID primiti
 	filter := bson.M{"_id": productID}
 	update := bson.M{
 		"$set": bson.M{
+			"sku":      updatedProduct.SKU,
 			"name":     updatedProduct.Name,
 			"material": updatedProduct.Material,
 			"color":    updatedProduct.Color,
@@ -126,4 +129,31 @@ func (s *MongoProductStore) GetProductSizes(ctx context.Context) ([]string, erro
 	}
 
 	return sizeStrings, nil
+}
+
+func (s *MongoProductStore) CheckExistedSKU(ctx context.Context, sku string) (bool, error) {
+	filter := bson.M{
+		"sku": sku,
+	}
+
+	count, err := s.coll.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+func (s *MongoProductStore) CheckDuplicateSKU(ctx context.Context, sku string, productID primitive.ObjectID) (bool, error) {
+	filter := bson.M{
+		"_id": bson.M{"$ne": productID}, // Exclude the current product
+		"sku": sku,
+	}
+
+	count, err := s.coll.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
 }

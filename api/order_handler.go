@@ -158,21 +158,21 @@ func (h *OrderHandler) HandleInsertOrder(c *fiber.Ctx) error {
 		})
 	}
 
-	orderDateParsed, err := time.Parse("2006-01-02", params.OrderDate)
+	orderDateParsed, err := time.Parse(time.RFC3339Nano, params.OrderDate)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid order date format",
 		})
 	}
 
-	deliveryDateParsed, err := time.Parse("2006-01-02", params.DeliveryDate)
+	deliveryDateParsed, err := time.Parse(time.RFC3339Nano, params.DeliveryDate)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid delivery date format",
 		})
 	}
 
-	paymentDateParsed, err := time.Parse("2006-01-02", params.PaymentDate)
+	paymentDateParsed, err := time.Parse(time.RFC3339Nano, params.PaymentDate)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid payment date format",
@@ -250,21 +250,21 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 		})
 	}
 
-	orderDateParsed, err := time.Parse("2006-01-02", params.OrderDate)
+	orderDateParsed, err := time.Parse(time.RFC3339Nano, params.OrderDate)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid order date format",
 		})
 	}
 
-	deliveryDateParsed, err := time.Parse("2006-01-02", params.DeliveryDate)
+	deliveryDateParsed, err := time.Parse(time.RFC3339Nano, params.DeliveryDate)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid delivery date format",
 		})
 	}
 
-	paymentDateParsed, err := time.Parse("2006-01-02", params.PaymentDate)
+	paymentDateParsed, err := time.Parse(time.RFC3339Nano, params.PaymentDate)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid payment date format",

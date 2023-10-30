@@ -13,6 +13,7 @@ import (
 )
 
 type InsertProductParams struct {
+	SKU      string  `json:"sku"`
 	Name     string  `json:"name"`
 	Material string  `json:"material"`
 	Color    string  `json:"color"`
@@ -24,11 +25,11 @@ type InsertProductParams struct {
 }
 
 func (p InsertProductParams) validate() error {
-	// Add validation logic if needed
 	return nil
 }
 
 type UpdateProductParams struct {
+	SKU      string  `json:"sku"`
 	Name     string  `json:"name"`
 	Material string  `json:"material"`
 	Color    string  `json:"color"`
@@ -59,6 +60,7 @@ func NewProductHandler(store *db.Store) *ProductHandler {
 // @Description Retrieves a list of products based on query parameters.
 // @Tags Product
 // @Param id query string false "Product ID"
+// @Param sku query string false "Product SKU"
 // @Param name query string false "Product name"
 // @Param material query string false "Material"
 // @Param color query string false "Color"
@@ -72,6 +74,7 @@ func NewProductHandler(store *db.Store) *ProductHandler {
 // @Router /product [get]
 func (h *ProductHandler) HandleGetProducts(c *fiber.Ctx) error {
 	id := c.Query("id")
+	sku := c.Query("sku")
 	name := c.Query("name")
 	material := c.Query("material")
 	color := c.Query("color")
@@ -91,6 +94,9 @@ func (h *ProductHandler) HandleGetProducts(c *fiber.Ctx) error {
 			})
 		}
 		filter["_id"] = objID
+	}
+	if sku != "" {
+		filter["sku"] = sku
 	}
 	if name != "" {
 		filter["name"] = name
@@ -163,7 +169,19 @@ func (h *ProductHandler) HandleInsertProduct(c *fiber.Ctx) error {
 		return err
 	}
 
+	skuExists, err := h.store.Product.CheckExistedSKU(c.Context(), params.SKU)
+	if err != nil {
+		return err
+	}
+
+	if skuExists {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "SKU is already in use by others",
+		})
+	}
+
 	product := types.Product{
+		SKU:      params.SKU,
 		Name:     params.Name,
 		Material: params.Material,
 		Color:    params.Color,
@@ -174,10 +192,10 @@ func (h *ProductHandler) HandleInsertProduct(c *fiber.Ctx) error {
 	}
 
 	if params.Date != "" {
-		dateParsed, err := time.Parse("2006-01-02", params.Date)
+		dateParsed, err := time.Parse(time.RFC3339Nano, params.Date)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid start date format",
+				"error": "Invalid date format",
 			})
 		}
 		product.Date = dateParsed
@@ -216,7 +234,19 @@ func (h *ProductHandler) HandleUpdateProduct(c *fiber.Ctx) error {
 		return err
 	}
 
+	skuDuplicated, err := h.store.Product.CheckDuplicateSKU(c.Context(), params.SKU, productID)
+	if err != nil {
+		return err
+	}
+
+	if skuDuplicated {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "SKU is already in use by others",
+		})
+	}
+
 	updatedProduct := types.Product{
+		SKU:      params.SKU,
 		Name:     params.Name,
 		Material: params.Material,
 		Color:    params.Color,
@@ -227,10 +257,10 @@ func (h *ProductHandler) HandleUpdateProduct(c *fiber.Ctx) error {
 	}
 
 	if params.Date != "" {
-		dateParsed, err := time.Parse("2006-01-02", params.Date)
+		dateParsed, err := time.Parse(time.RFC3339Nano, params.Date)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid start date format",
+				"error": "Invalid date format",
 			})
 		}
 		updatedProduct.Date = dateParsed
