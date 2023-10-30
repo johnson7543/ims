@@ -188,17 +188,10 @@ func (h *OrderHandler) HandleInsertOrder(c *fiber.Ctx) error {
 			})
 		}
 
-		sku, err := primitive.ObjectIDFromHex(item.Product.SKU)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid product SKU",
-			})
-		}
-
 		orderItems[i] = types.OrderItem{
 			Product: types.OrderProduct{
 				ID:        productID,
-				SKU:       sku,
+				SKU:       item.Product.SKU,
 				UnitPrice: item.Product.UnitPrice,
 			},
 			Quantity:   item.Quantity,
@@ -280,7 +273,7 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 
 	orderItems := make([]types.OrderItem, len(params.OrderItems))
 	for i, item := range params.OrderItems {
-		productID, err := primitive.ObjectIDFromHex(item.Product.SKU)
+		productID, err := primitive.ObjectIDFromHex(item.Product.ID)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid product ID",
@@ -289,7 +282,8 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 
 		orderItems[i] = types.OrderItem{
 			Product: types.OrderProduct{
-				SKU:       productID,
+				ID:        productID,
+				SKU:       item.Product.SKU,
 				UnitPrice: item.Product.UnitPrice,
 			},
 			Quantity:   item.Quantity,
