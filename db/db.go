@@ -11,6 +11,7 @@ type Store struct {
 	HealthCheck    HealthCheckStore
 	User           UserStore
 	Material       MaterialStore
+	MaterialOrder  MaterialOrderStore
 	Worker         WorkerStore
 	Product        ProductStore
 	ProcessingItem ProcessingItemStore

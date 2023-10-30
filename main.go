@@ -44,6 +44,7 @@ func main() {
 		healthCheckStore    = db.NewMongoHealthCheckStore(client)
 		userStore           = db.NewMongoUserStore(client)
 		materialStore       = db.NewMongoMaterialStore(client)
+		materialOrderStore  = db.NewMongoMaterialOrderStore(client)
 		workerStore         = db.NewMongoWorkerStore(client)
 		porcessingItemStore = db.NewMongoProcessingItemStore(client)
 		productStore        = db.NewMongoProductStore(client)
@@ -52,6 +53,7 @@ func main() {
 			HealthCheck:    healthCheckStore,
 			User:           userStore,
 			Material:       materialStore,
+			MaterialOrder:  materialOrderStore,
 			Worker:         workerStore,
 			ProcessingItem: porcessingItemStore,
 			Product:        productStore,
@@ -60,6 +62,7 @@ func main() {
 		HealthCheckHandler    = api.NewHealthCheckHandler(store)
 		authHandler           = api.NewAuthHandler(store)
 		materialHandler       = api.NewMaterialHandler(store)
+		materialOrderHandler  = api.NewMaterialOrderHandler(store)
 		workerHandler         = api.NewWorkerHandler(store)
 		processingItemHandler = api.NewProcessingItemHandler(store)
 		productHandler        = api.NewProductHandler(store)
@@ -83,24 +86,29 @@ func main() {
 	apiv1.Get("/material/colors", materialHandler.HandleGetMaterialColors)
 	apiv1.Get("/material/sizes", materialHandler.HandleGetMaterialSizes)
 
+	apiv1.Get("/materialOrder", materialOrderHandler.HandleGetMaterialOrders)
+	apiv1.Post("/materialOrder", materialOrderHandler.HandleInsertMaterialOrder)
+	apiv1.Patch("/materialOrder/:id", materialOrderHandler.HandleUpdateMaterialOrder)
+	apiv1.Delete("/materialOrder/:id", materialOrderHandler.HandleDeleteMaterialOrder)
+
 	apiv1.Get("/worker", workerHandler.HandleGetWorkers)
 	apiv1.Post("/worker", workerHandler.HandleInsertWorker)
-	apiv1.Patch("/worker/:id", workerHandler.HandleUpdateWorker) // to-do handler
+	apiv1.Patch("/worker/:id", workerHandler.HandleUpdateWorker)
 	apiv1.Delete("/worker/:id", workerHandler.HandleDeleteWorker)
 
 	apiv1.Get("/processingItem", processingItemHandler.HandleGetProcessingItems)
 	apiv1.Post("/processingItem", processingItemHandler.HandleInsertProcessingItem)
-	apiv1.Patch("/processingItem/:id", processingItemHandler.HandleUpdateProcessingItem) // to-do handler
+	apiv1.Patch("/processingItem/:id", processingItemHandler.HandleUpdateProcessingItem)
 	apiv1.Delete("/processingItem/:id", processingItemHandler.HandleDeleteProcessingItem)
 
 	apiv1.Get("/product", productHandler.HandleGetProducts)
 	apiv1.Post("/product", productHandler.HandleInsertProduct)
-	apiv1.Patch("/product/:id", productHandler.HandleUpdateProduct) // to-do handler
+	apiv1.Patch("/product/:id", productHandler.HandleUpdateProduct)
 	apiv1.Delete("/product/:id", productHandler.HandleDeleteProduct)
 
 	apiv1.Get("/order", orderHandler.HandleGetOrders)
 	apiv1.Post("/order", orderHandler.HandleInsertOrder)
-	apiv1.Patch("/order/:id", orderHandler.HandleUpdateOrder) // to-do handler
+	apiv1.Patch("/order/:id", orderHandler.HandleUpdateOrder)
 	apiv1.Delete("/order/:id", orderHandler.HandleDeleteOrder)
 
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)
