@@ -151,20 +151,6 @@ func (h *MaterialOrderHandler) HandleInsertMaterialOrder(c *fiber.Ctx) error {
 		})
 	}
 
-	deliveryDateParsed, err := time.Parse(time.RFC3339Nano, params.DeliveryDate)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid delivery date format",
-		})
-	}
-
-	paymentDateParsed, err := time.Parse(time.RFC3339Nano, params.PaymentDate)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid payment date format",
-		})
-	}
-
 	materialOrderItems := make([]types.MaterialOrderItem, len(params.MaterialOrderItems))
 	for i, item := range params.MaterialOrderItems {
 		materialID, err := primitive.ObjectIDFromHex(item.Material.MaterialID)
@@ -225,11 +211,29 @@ func (h *MaterialOrderHandler) HandleInsertMaterialOrder(c *fiber.Ctx) error {
 	materialOrder := types.MaterialOrder{
 		SellerID:           params.SellerID,
 		OrderDate:          orderDateParsed,
-		DeliveryDate:       deliveryDateParsed,
-		PaymentDate:        paymentDateParsed,
 		TotalAmount:        params.TotalAmount,
 		Status:             params.Status,
 		MaterialOrderItems: materialOrderItems,
+	}
+
+	if params.DeliveryDate != "" {
+		deliveryDateParsed, err := time.Parse(time.RFC3339Nano, params.DeliveryDate)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid delivery date format",
+			})
+		}
+		materialOrder.DeliveryDate = deliveryDateParsed
+	}
+
+	if params.PaymentDate != "" {
+		paymentDateParsed, err := time.Parse(time.RFC3339Nano, params.PaymentDate)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid payment date format",
+			})
+		}
+		materialOrder.PaymentDate = paymentDateParsed
 	}
 
 	inserted, err := h.store.MaterialOrder.InsertMaterialOrder(c.Context(), &materialOrder)
@@ -270,20 +274,6 @@ func (h *MaterialOrderHandler) HandleUpdateMaterialOrder(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid order date format",
-		})
-	}
-
-	deliveryDateParsed, err := time.Parse(time.RFC3339Nano, params.DeliveryDate)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid delivery date format",
-		})
-	}
-
-	paymentDateParsed, err := time.Parse(time.RFC3339Nano, params.PaymentDate)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid payment date format",
 		})
 	}
 
@@ -334,12 +324,30 @@ func (h *MaterialOrderHandler) HandleUpdateMaterialOrder(c *fiber.Ctx) error {
 	}
 
 	updatedMaterialOrder := types.MaterialOrder{
-		SellerID:     params.SellerID,
-		OrderDate:    orderDateParsed,
-		DeliveryDate: deliveryDateParsed,
-		PaymentDate:  paymentDateParsed,
-		TotalAmount:  params.TotalAmount,
-		Status:       params.Status,
+		SellerID:    params.SellerID,
+		OrderDate:   orderDateParsed,
+		TotalAmount: params.TotalAmount,
+		Status:      params.Status,
+	}
+
+	if params.DeliveryDate != "" {
+		deliveryDateParsed, err := time.Parse(time.RFC3339Nano, params.DeliveryDate)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid delivery date format",
+			})
+		}
+		updatedMaterialOrder.DeliveryDate = deliveryDateParsed
+	}
+
+	if params.PaymentDate != "" {
+		paymentDateParsed, err := time.Parse(time.RFC3339Nano, params.PaymentDate)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid payment date format",
+			})
+		}
+		updatedMaterialOrder.PaymentDate = paymentDateParsed
 	}
 
 	updateCount, err := h.store.MaterialOrder.UpdateMaterialOrder(c.Context(), materialOrderID, &updatedMaterialOrder)

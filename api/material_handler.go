@@ -1,6 +1,8 @@
 package api
 
 import (
+	"time"
+
 	"github.com/johnson7543/ims/db"
 	"github.com/johnson7543/ims/types"
 
@@ -10,11 +12,17 @@ import (
 )
 
 type InsertMaterialParams struct {
-	Name     string `json:"name"`
-	Color    string `json:"color"`
-	Size     string `json:"size"`
-	Quantity int    `json:"quantity"`
-	Remarks  string `json:"remarks"`
+	Name         string                    `json:"name"`
+	Color        string                    `json:"color"`
+	Size         string                    `json:"size"`
+	Quantity     int                       `json:"quantity"`
+	Remarks      string                    `json:"remarks"`
+	PriceHistory []InsertPriceHistoryEntry `json:"price_history"`
+}
+
+type InsertPriceHistoryEntry struct {
+	Price     float64 `json:"price"`
+	UpdatedAt string  `json:"updated_at"`
 }
 
 func (p InsertMaterialParams) validate() error {
@@ -23,11 +31,17 @@ func (p InsertMaterialParams) validate() error {
 }
 
 type UpdateMaterialParams struct {
-	Name     string `json:"name"`
-	Color    string `json:"color"`
-	Size     string `json:"size"`
-	Quantity int    `json:"quantity"`
-	Remarks  string `json:"remarks"`
+	Name         string                    `json:"name"`
+	Color        string                    `json:"color"`
+	Size         string                    `json:"size"`
+	Quantity     int                       `json:"quantity"`
+	Remarks      string                    `json:"remarks"`
+	PriceHistory []UpdatePriceHistoryEntry `json:"price_history"`
+}
+
+type UpdatePriceHistoryEntry struct {
+	Price     float64 `json:"price"`
+	UpdatedAt string  `json:"updated_at"`
 }
 
 func (p UpdateMaterialParams) validate() error {
@@ -126,12 +140,28 @@ func (h *MaterialHandler) HandleInsertMaterial(c *fiber.Ctx) error {
 		return err
 	}
 
+	var insertedPriceHistory []types.PriceHistoryEntry
+
+	if len(params.PriceHistory) > 0 {
+		for _, entry := range params.PriceHistory {
+			parsedDate, err := time.Parse(time.RFC3339Nano, entry.UpdatedAt)
+			if err != nil {
+				return err
+			}
+			insertedPriceHistory = append(insertedPriceHistory, types.PriceHistoryEntry{
+				Price:     entry.Price,
+				UpdatedAt: parsedDate,
+			})
+		}
+	}
+
 	material := types.Material{
-		Name:     params.Name,
-		Color:    params.Color,
-		Size:     params.Size,
-		Quantity: params.Quantity,
-		Remarks:  params.Remarks,
+		Name:         params.Name,
+		Color:        params.Color,
+		Size:         params.Size,
+		Quantity:     params.Quantity,
+		Remarks:      params.Remarks,
+		PriceHistory: insertedPriceHistory,
 	}
 
 	inserted, err := h.store.Material.InsertMaterial(c.Context(), &material)
@@ -167,12 +197,28 @@ func (h *MaterialHandler) HandleUpdateMaterial(c *fiber.Ctx) error {
 		return err
 	}
 
+	var updatedPriceHistory []types.PriceHistoryEntry
+
+	if len(params.PriceHistory) > 0 {
+		for _, entry := range params.PriceHistory {
+			parsedDate, err := time.Parse(time.RFC3339Nano, entry.UpdatedAt)
+			if err != nil {
+				return err
+			}
+			updatedPriceHistory = append(updatedPriceHistory, types.PriceHistoryEntry{
+				Price:     entry.Price,
+				UpdatedAt: parsedDate,
+			})
+		}
+	}
+
 	updatedMaterial := types.Material{
-		Name:     params.Name,
-		Color:    params.Color,
-		Size:     params.Size,
-		Quantity: params.Quantity,
-		Remarks:  params.Remarks,
+		Name:         params.Name,
+		Color:        params.Color,
+		Size:         params.Size,
+		Quantity:     params.Quantity,
+		Remarks:      params.Remarks,
+		PriceHistory: updatedPriceHistory,
 	}
 
 	updateCount, err := h.store.Material.UpdateMaterial(c.Context(), materialID, &updatedMaterial)
@@ -182,7 +228,7 @@ func (h *MaterialHandler) HandleUpdateMaterial(c *fiber.Ctx) error {
 
 	if updateCount == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Material not found",
+			"error": "Material not found or not updated",
 		})
 	}
 	return c.JSON(fiber.Map{
