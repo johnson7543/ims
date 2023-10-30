@@ -267,6 +267,149 @@ const docTemplate = `{
                 }
             }
         },
+        "/materialOrder": {
+            "get": {
+                "description": "Retrieves a list of material orders based on query parameters.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MaterialOrder"
+                ],
+                "summary": "Get material orders",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Material Order ID",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Seller ID",
+                        "name": "sellerId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Material Order status",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/types.MaterialOrder"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Inserts a new material order.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MaterialOrder"
+                ],
+                "summary": "Insert material order",
+                "parameters": [
+                    {
+                        "description": "Material Order information",
+                        "name": "materialOrder",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.InsertMaterialOrderParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.MaterialOrder"
+                        }
+                    }
+                }
+            }
+        },
+        "/materialOrder/{id}": {
+            "delete": {
+                "description": "Deletes a material order by ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MaterialOrder"
+                ],
+                "summary": "Delete material order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Material Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/fiber.Map"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update an existing material order in the system.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MaterialOrder"
+                ],
+                "summary": "Update material order",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Material Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated material order details",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.UpdateMaterialOrderParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/fiber.Map"
+                        }
+                    }
+                }
+            }
+        },
         "/order": {
             "get": {
                 "description": "Retrieves a list of orders based on query parameters.",
@@ -604,6 +747,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Product ID",
                         "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Product SKU",
+                        "name": "sku",
                         "in": "query"
                     },
                     {
@@ -953,6 +1102,78 @@ const docTemplate = `{
                 }
             }
         },
+        "api.InsertMaterialOrderItemParams": {
+            "type": "object",
+            "properties": {
+                "material": {
+                    "$ref": "#/definitions/api.InsertMaterialOrderMaterialParams"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "api.InsertMaterialOrderMaterialParams": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "remarks": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "string"
+                }
+            }
+        },
+        "api.InsertMaterialOrderParams": {
+            "type": "object",
+            "properties": {
+                "deliveryDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "materialOrderItems": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.InsertMaterialOrderItemParams"
+                    }
+                },
+                "orderDate": {
+                    "type": "string"
+                },
+                "paymentDate": {
+                    "type": "string"
+                },
+                "sellerID": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "totalAmount": {
+                    "type": "number"
+                }
+            }
+        },
         "api.InsertMaterialParams": {
             "type": "object",
             "properties": {
@@ -963,7 +1184,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "quantity": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "remarks": {
                     "type": "string"
@@ -1022,6 +1243,9 @@ const docTemplate = `{
         "api.InsertOrderProductParams": {
             "type": "object",
             "properties": {
+                "id": {
+                    "type": "string"
+                },
                 "sku": {
                     "type": "string"
                 },
@@ -1085,6 +1309,9 @@ const docTemplate = `{
                 },
                 "size": {
                     "type": "string"
+                },
+                "sku": {
+                    "type": "string"
                 }
             }
         },
@@ -1108,6 +1335,32 @@ const docTemplate = `{
                 }
             }
         },
+        "api.UpdateMaterialOrderParams": {
+            "type": "object",
+            "properties": {
+                "deliveryDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "orderDate": {
+                    "type": "string"
+                },
+                "paymentDate": {
+                    "type": "string"
+                },
+                "sellerID": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "totalAmount": {
+                    "type": "number"
+                }
+            }
+        },
         "api.UpdateMaterialParams": {
             "type": "object",
             "properties": {
@@ -1118,7 +1371,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "quantity": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "remarks": {
                     "type": "string"
@@ -1177,6 +1430,9 @@ const docTemplate = `{
         "api.UpdateOrderProductParams": {
             "type": "object",
             "properties": {
+                "id": {
+                    "type": "string"
+                },
                 "sku": {
                     "type": "string"
                 },
@@ -1240,6 +1496,9 @@ const docTemplate = `{
                 },
                 "size": {
                     "type": "string"
+                },
+                "sku": {
+                    "type": "string"
                 }
             }
         },
@@ -1290,8 +1549,83 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "price_history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.PriceHistoryEntry"
+                    }
+                },
                 "quantity": {
+                    "type": "integer"
+                },
+                "remarks": {
                     "type": "string"
+                },
+                "size": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.MaterialOrder": {
+            "type": "object",
+            "properties": {
+                "deliveryDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "materialOrderItems": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.MaterialOrderItem"
+                    }
+                },
+                "orderDate": {
+                    "type": "string"
+                },
+                "paymentDate": {
+                    "type": "string"
+                },
+                "sellerId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "totalAmount": {
+                    "type": "number"
+                }
+            }
+        },
+        "types.MaterialOrderItem": {
+            "type": "object",
+            "properties": {
+                "material": {
+                    "$ref": "#/definitions/types.MaterialOrderMaterial"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "types.MaterialOrderMaterial": {
+            "type": "object",
+            "properties": {
+                "color": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
                 },
                 "remarks": {
                     "type": "string"
@@ -1353,11 +1687,25 @@ const docTemplate = `{
         "types.OrderProduct": {
             "type": "object",
             "properties": {
+                "id": {
+                    "type": "string"
+                },
                 "sku": {
                     "type": "string"
                 },
                 "unitPrice": {
                     "type": "number"
+                }
+            }
+        },
+        "types.PriceHistoryEntry": {
+            "type": "object",
+            "properties": {
+                "price": {
+                    "type": "number"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
@@ -1421,6 +1769,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "size": {
+                    "type": "string"
+                },
+                "sku": {
                     "type": "string"
                 }
             }

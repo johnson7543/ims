@@ -42,11 +42,12 @@ func main() {
 
 	for i := 1; i <= 5; i++ {
 		material := &types.Material{
-			Name:     fmt.Sprintf("Material_%d", i),
-			Color:    fmt.Sprintf("Color_%d", i), // You can replace this with actual color data
-			Size:     fmt.Sprintf("Size_%d", i),  // You can replace this with actual size data
-			Quantity: fmt.Sprintf("%d", i*10),
-			Remarks:  fmt.Sprintf("Remarks for Material %d", i),
+			Name:         fmt.Sprintf("Material_%d", i),
+			Color:        fmt.Sprintf("Color_%d", i),
+			Size:         fmt.Sprintf("Size_%d", i),
+			Quantity:     i * 10,
+			Remarks:      fmt.Sprintf("Remarks for Material %d", i),
+			PriceHistory: []types.PriceHistoryEntry{},
 		}
 
 		material = fixtures.AddMaterial(store, material)

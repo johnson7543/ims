@@ -16,7 +16,7 @@ type Material struct {
 	Name         string              `bson:"name" json:"name"`
 	Color        string              `bson:"color" json:"color"`
 	Size         string              `bson:"size" json:"size"`
-	Quantity     string              `bson:"quantity" json:"quantity"`
+	Quantity     int                 `bson:"quantity" json:"quantity"`
 	Remarks      string              `bson:"remarks" json:"remarks"`
 	PriceHistory []PriceHistoryEntry `bson:"price_history" json:"price_history"`
 }

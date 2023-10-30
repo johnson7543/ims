@@ -1,8 +1,6 @@
 package api
 
 import (
-	"strconv"
-
 	"github.com/johnson7543/ims/db"
 	"github.com/johnson7543/ims/types"
 
@@ -15,7 +13,7 @@ type InsertMaterialParams struct {
 	Name     string `json:"name"`
 	Color    string `json:"color"`
 	Size     string `json:"size"`
-	Quantity string `json:"quantity"`
+	Quantity int    `json:"quantity"`
 	Remarks  string `json:"remarks"`
 }
 
@@ -28,7 +26,7 @@ type UpdateMaterialParams struct {
 	Name     string `json:"name"`
 	Color    string `json:"color"`
 	Size     string `json:"size"`
-	Quantity string `json:"quantity"`
+	Quantity int    `json:"quantity"`
 	Remarks  string `json:"remarks"`
 }
 
@@ -89,12 +87,6 @@ func (h *MaterialHandler) HandleGetMaterials(c *fiber.Ctx) error {
 		filter["size"] = size
 	}
 	if quantity != "" {
-		quantity, err := strconv.Atoi(quantity)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid quantity value",
-			})
-		}
 		filter["quantity"] = quantity
 	}
 	if remarks != "" {

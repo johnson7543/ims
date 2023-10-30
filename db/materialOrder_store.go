@@ -14,10 +14,11 @@ import (
 const materialOrderColl = "materialOrders"
 
 type MaterialOrderStore interface {
-	GetMaterialOrders(ctx context.Context, filter bson.M) ([]*types.MaterialOrder, error)
-	InsertMaterialOrder(ctx context.Context, order *types.MaterialOrder) (*types.MaterialOrder, error)
-	UpdateMaterialOrder(ctx context.Context, orderID primitive.ObjectID, updatedOrder *types.MaterialOrder) (int64, error)
-	DeleteMaterialOrder(ctx context.Context, id primitive.ObjectID) (int64, error)
+	GetMaterialOrders(context.Context, bson.M) ([]*types.MaterialOrder, error)
+	GetMaterialOrder(context.Context, primitive.ObjectID) (*types.MaterialOrder, error)
+	InsertMaterialOrder(context.Context, *types.MaterialOrder) (*types.MaterialOrder, error)
+	UpdateMaterialOrder(context.Context, primitive.ObjectID, *types.MaterialOrder) (int64, error)
+	DeleteMaterialOrder(context.Context, primitive.ObjectID) (int64, error)
 }
 
 type MongoMaterialOrderStore struct {
@@ -54,6 +55,18 @@ func (s *MongoMaterialOrderStore) GetMaterialOrders(ctx context.Context, filter 
 	}
 
 	return materialOrders, nil
+}
+
+func (s *MongoMaterialOrderStore) GetMaterialOrder(ctx context.Context, materialOrderID primitive.ObjectID) (*types.MaterialOrder, error) {
+	filter := bson.M{"_id": materialOrderID}
+	var materialOrder types.MaterialOrder
+
+	err := s.coll.FindOne(ctx, filter).Decode(&materialOrder)
+	if err != nil {
+		return nil, err
+	}
+
+	return &materialOrder, nil
 }
 
 func (s *MongoMaterialOrderStore) InsertMaterialOrder(ctx context.Context, order *types.MaterialOrder) (*types.MaterialOrder, error) {

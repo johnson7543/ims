@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"os"
 
 	"github.com/johnson7543/ims/types"
@@ -15,11 +16,12 @@ const materialColl = "materials"
 
 type MaterialStore interface {
 	GetMaterials(context.Context, bson.M) ([]*types.Material, error)
+	GetMaterial(context.Context, primitive.ObjectID) (*types.Material, error)
 	InsertMaterial(context.Context, *types.Material) (*types.Material, error)
-	UpdateMaterial(ctx context.Context, materialID primitive.ObjectID, updates *types.Material) (int64, error)
-	DeleteMaterial(ctx context.Context, id primitive.ObjectID) (int64, error)
-	GetMaterialColors(ctx context.Context) ([]string, error)
-	GetMaterialSizes(ctx context.Context) ([]string, error)
+	UpdateMaterial(context.Context, primitive.ObjectID, *types.Material) (int64, error)
+	DeleteMaterial(context.Context, primitive.ObjectID) (int64, error)
+	GetMaterialColors(context.Context) ([]string, error)
+	GetMaterialSizes(context.Context) ([]string, error)
 }
 
 type MongoMaterialStore struct {
@@ -58,6 +60,21 @@ func (s *MongoMaterialStore) GetMaterials(ctx context.Context, filter bson.M) ([
 	return materials, nil
 }
 
+func (s *MongoMaterialStore) GetMaterial(ctx context.Context, materialID primitive.ObjectID) (*types.Material, error) {
+	filter := bson.M{"_id": materialID}
+	var material types.Material
+
+	err := s.coll.FindOne(ctx, filter).Decode(&material)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("material not found")
+		}
+		return nil, err
+	}
+
+	return &material, nil
+}
+
 func (s *MongoMaterialStore) InsertMaterial(ctx context.Context, material *types.Material) (*types.Material, error) {
 	resp, err := s.coll.InsertOne(ctx, material)
 	if err != nil {
@@ -72,11 +89,12 @@ func (s *MongoMaterialStore) UpdateMaterial(ctx context.Context, materialID prim
 	filter := bson.M{"_id": materialID}
 	update := bson.M{
 		"$set": bson.M{
-			"name":     updates.Name,
-			"color":    updates.Color,
-			"size":     updates.Size,
-			"quantity": updates.Quantity,
-			"remarks":  updates.Remarks,
+			"name":          updates.Name,
+			"color":         updates.Color,
+			"size":          updates.Size,
+			"quantity":      updates.Quantity,
+			"remarks":       updates.Remarks,
+			"price_history": updates.PriceHistory,
 		},
 	}
 

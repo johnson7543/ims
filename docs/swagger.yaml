@@ -14,6 +14,53 @@ definitions:
       user:
         $ref: '#/definitions/types.User'
     type: object
+  api.InsertMaterialOrderItemParams:
+    properties:
+      material:
+        $ref: '#/definitions/api.InsertMaterialOrderMaterialParams'
+      quantity:
+        type: integer
+      totalPrice:
+        type: number
+    type: object
+  api.InsertMaterialOrderMaterialParams:
+    properties:
+      color:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
+      quantity:
+        type: integer
+      remarks:
+        type: string
+      size:
+        type: string
+    type: object
+  api.InsertMaterialOrderParams:
+    properties:
+      deliveryDate:
+        type: string
+      id:
+        type: string
+      materialOrderItems:
+        items:
+          $ref: '#/definitions/api.InsertMaterialOrderItemParams'
+        type: array
+      orderDate:
+        type: string
+      paymentDate:
+        type: string
+      sellerID:
+        type: string
+      status:
+        type: string
+      totalAmount:
+        type: number
+    type: object
   api.InsertMaterialParams:
     properties:
       color:
@@ -21,7 +68,7 @@ definitions:
       name:
         type: string
       quantity:
-        type: string
+        type: integer
       remarks:
         type: string
       size:
@@ -59,6 +106,8 @@ definitions:
     type: object
   api.InsertOrderProductParams:
     properties:
+      id:
+        type: string
       sku:
         type: string
       unitPrice:
@@ -101,6 +150,8 @@ definitions:
         type: string
       size:
         type: string
+      sku:
+        type: string
     type: object
   api.InsertWorkerParams:
     properties:
@@ -115,6 +166,23 @@ definitions:
       taxIdNumber:
         type: string
     type: object
+  api.UpdateMaterialOrderParams:
+    properties:
+      deliveryDate:
+        type: string
+      id:
+        type: string
+      orderDate:
+        type: string
+      paymentDate:
+        type: string
+      sellerID:
+        type: string
+      status:
+        type: string
+      totalAmount:
+        type: number
+    type: object
   api.UpdateMaterialParams:
     properties:
       color:
@@ -122,7 +190,7 @@ definitions:
       name:
         type: string
       quantity:
-        type: string
+        type: integer
       remarks:
         type: string
       size:
@@ -160,6 +228,8 @@ definitions:
     type: object
   api.UpdateOrderProductParams:
     properties:
+      id:
+        type: string
       sku:
         type: string
       unitPrice:
@@ -202,6 +272,8 @@ definitions:
         type: string
       size:
         type: string
+      sku:
+        type: string
     type: object
   api.UpdateWorkerParams:
     properties:
@@ -234,8 +306,57 @@ definitions:
         type: string
       name:
         type: string
+      price_history:
+        items:
+          $ref: '#/definitions/types.PriceHistoryEntry'
+        type: array
       quantity:
+        type: integer
+      remarks:
         type: string
+      size:
+        type: string
+    type: object
+  types.MaterialOrder:
+    properties:
+      deliveryDate:
+        type: string
+      id:
+        type: string
+      materialOrderItems:
+        items:
+          $ref: '#/definitions/types.MaterialOrderItem'
+        type: array
+      orderDate:
+        type: string
+      paymentDate:
+        type: string
+      sellerId:
+        type: string
+      status:
+        type: string
+      totalAmount:
+        type: number
+    type: object
+  types.MaterialOrderItem:
+    properties:
+      material:
+        $ref: '#/definitions/types.MaterialOrderMaterial'
+      quantity:
+        type: integer
+      totalPrice:
+        type: number
+    type: object
+  types.MaterialOrderMaterial:
+    properties:
+      color:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      price:
+        type: number
       remarks:
         type: string
       size:
@@ -275,10 +396,19 @@ definitions:
     type: object
   types.OrderProduct:
     properties:
+      id:
+        type: string
       sku:
         type: string
       unitPrice:
         type: number
+    type: object
+  types.PriceHistoryEntry:
+    properties:
+      price:
+        type: number
+      updated_at:
+        type: string
     type: object
   types.ProcessingItem:
     properties:
@@ -320,6 +450,8 @@ definitions:
       remark:
         type: string
       size:
+        type: string
+      sku:
         type: string
     type: object
   types.User:
@@ -523,6 +655,100 @@ paths:
       summary: Get material sizes
       tags:
       - Material
+  /materialOrder:
+    get:
+      description: Retrieves a list of material orders based on query parameters.
+      parameters:
+      - description: Material Order ID
+        in: query
+        name: id
+        type: string
+      - description: Seller ID
+        in: query
+        name: sellerId
+        type: string
+      - description: Material Order status
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/types.MaterialOrder'
+            type: array
+      summary: Get material orders
+      tags:
+      - MaterialOrder
+    post:
+      consumes:
+      - application/json
+      description: Inserts a new material order.
+      parameters:
+      - description: Material Order information
+        in: body
+        name: materialOrder
+        required: true
+        schema:
+          $ref: '#/definitions/api.InsertMaterialOrderParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.MaterialOrder'
+      summary: Insert material order
+      tags:
+      - MaterialOrder
+  /materialOrder/{id}:
+    delete:
+      description: Deletes a material order by ID.
+      parameters:
+      - description: Material Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      summary: Delete material order
+      tags:
+      - MaterialOrder
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing material order in the system.
+      parameters:
+      - description: Material Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated material order details
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateMaterialOrderParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/fiber.Map'
+      summary: Update material order
+      tags:
+      - MaterialOrder
   /order:
     get:
       description: Retrieves a list of orders based on query parameters.
@@ -742,6 +968,10 @@ paths:
       - description: Product ID
         in: query
         name: id
+        type: string
+      - description: Product SKU
+        in: query
+        name: sku
         type: string
       - description: Product name
         in: query

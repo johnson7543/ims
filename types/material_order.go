@@ -29,6 +29,5 @@ type MaterialOrderMaterial struct {
 	Price      float64            `bson:"price" json:"price"`
 	Color      string             `bson:"color" json:"color"`
 	Size       string             `bson:"size" json:"size"`
-	Quantity   string             `bson:"quantity" json:"quantity"`
 	Remarks    string             `bson:"remarks" json:"remarks"`
 }

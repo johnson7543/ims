@@ -1,6 +1,7 @@
 package api
 
 import (
+	"strings"
 	"time"
 
 	"github.com/johnson7543/ims/db"
@@ -9,6 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type InsertMaterialOrderParams struct {
@@ -34,7 +36,7 @@ type InsertMaterialOrderMaterialParams struct {
 	Price      float64 `json:"price"`
 	Color      string  `json:"color"`
 	Size       string  `json:"size"`
-	Quantity   string  `json:"quantity"`
+	Quantity   int     `json:"quantity"`
 	Remarks    string  `json:"remarks"`
 }
 
@@ -165,13 +167,17 @@ func (h *MaterialOrderHandler) HandleInsertMaterialOrder(c *fiber.Ctx) error {
 
 	materialOrderItems := make([]types.MaterialOrderItem, len(params.MaterialOrderItems))
 	for i, item := range params.MaterialOrderItems {
+		materialID, err := primitive.ObjectIDFromHex(item.Material.MaterialID)
+		if err != nil {
+			return err
+		}
 		material := types.MaterialOrderMaterial{
-			Name:     item.Material.Name,
-			Price:    item.Material.Price,
-			Color:    item.Material.Color,
-			Size:     item.Material.Size,
-			Quantity: item.Material.Quantity,
-			Remarks:  item.Material.Remarks,
+			MaterialID: materialID,
+			Name:       item.Material.Name,
+			Price:      item.Material.Price,
+			Color:      item.Material.Color,
+			Size:       item.Material.Size,
+			Remarks:    item.Material.Remarks,
 		}
 
 		materialOrderItems[i] = types.MaterialOrderItem{
@@ -179,6 +185,41 @@ func (h *MaterialOrderHandler) HandleInsertMaterialOrder(c *fiber.Ctx) error {
 			Quantity:   item.Quantity,
 			TotalPrice: item.TotalPrice,
 		}
+
+		// update materail information
+		if strings.ToLower(params.Status) == "completed" {
+			m, err := h.store.Material.GetMaterial(c.Context(), materialID)
+			if err != nil {
+				if err != mongo.ErrNoDocuments {
+					return err
+				}
+
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"error": "Material doesn't exist, please create the material first.",
+				})
+			} else {
+				material := *m // make a copy
+				material.Name = item.Material.Name
+				material.Color = item.Material.Color
+				material.Size = item.Material.Size
+				material.Quantity += item.Material.Quantity
+				material.Remarks = item.Material.Remarks
+
+				priceHistoryEntry := types.PriceHistoryEntry{
+					Price:     item.Material.Price,
+					UpdatedAt: orderDateParsed,
+				}
+
+				material.PriceHistory = append(material.PriceHistory, priceHistoryEntry)
+
+				_, err = h.store.Material.UpdateMaterial(c.Context(), materialID, &material)
+				if err != nil {
+					return err
+				}
+			}
+
+		}
+
 	}
 
 	materialOrder := types.MaterialOrder{
@@ -195,6 +236,7 @@ func (h *MaterialOrderHandler) HandleInsertMaterialOrder(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
 	return c.JSON(inserted)
 }
 
@@ -243,6 +285,52 @@ func (h *MaterialOrderHandler) HandleUpdateMaterialOrder(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid payment date format",
 		})
+	}
+
+	mo, err := h.store.MaterialOrder.GetMaterialOrder(c.Context(), materialOrderID)
+	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			return err
+		}
+
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Material order doesn't exist.",
+		})
+	}
+
+	// update materail information if the status changed into completed status
+	if strings.ToLower(mo.Status) != "completed" && strings.ToLower(params.Status) == "completed" {
+		// update all material items in the materil order
+		for _, item := range mo.MaterialOrderItems {
+			m, err := h.store.Material.GetMaterial(c.Context(), item.Material.MaterialID)
+			if err != nil {
+				if err != mongo.ErrNoDocuments {
+					return err
+				}
+
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"error": "Material doesn't exist, please create the material first.",
+				})
+			}
+
+			material := *m // make a copy
+			material.Name = item.Material.Name
+			material.Color = item.Material.Color
+			material.Size = item.Material.Size
+			material.Quantity += item.Quantity
+			material.Remarks = item.Material.Remarks
+
+			priceHistoryEntry := types.PriceHistoryEntry{
+				Price:     item.Material.Price,
+				UpdatedAt: orderDateParsed,
+			}
+			material.PriceHistory = append(material.PriceHistory, priceHistoryEntry)
+
+			_, err = h.store.Material.UpdateMaterial(c.Context(), item.Material.MaterialID, &material)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	updatedMaterialOrder := types.MaterialOrder{
