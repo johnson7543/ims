@@ -23,7 +23,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/authenticate": {
+        "/auth": {
             "post": {
                 "description": "Authenticates a user based on email and password.",
                 "consumes": [

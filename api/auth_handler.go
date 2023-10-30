@@ -57,7 +57,7 @@ func invalidCredentials(c *fiber.Ctx) error {
 // @Param authParams body AuthParams true "Authentication parameters"
 // @Success 200 {object} AuthResponse
 // @Failure 400 {object} genericResp
-// @Router /authenticate [post]
+// @Router /auth [post]
 func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 	var params AuthParams
 	if err := c.BodyParser(&params); err != nil {

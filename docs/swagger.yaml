@@ -495,7 +495,7 @@ info:
   title: Fiber Example API
   version: "1.0"
 paths:
-  /authenticate:
+  /auth:
     post:
       consumes:
       - application/json
