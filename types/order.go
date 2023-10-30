@@ -27,6 +27,7 @@ type OrderItem struct {
 
 // OrderProduct represents a product associated with an order item.
 type OrderProduct struct {
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	SKU       primitive.ObjectID `bson:"sku,omitempty" json:"sku,omitempty"`
 	UnitPrice float64            `bson:"unitPrice" json:"unitPrice"`
 }

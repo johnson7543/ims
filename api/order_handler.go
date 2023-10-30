@@ -29,6 +29,7 @@ type InsertOrderItemParams struct {
 }
 
 type InsertOrderProductParams struct {
+	ID        string  `json:"id"`
 	SKU       string  `json:"sku"`
 	UnitPrice float64 `json:"unitPrice"`
 }
@@ -55,6 +56,7 @@ type UpdateOrderItemParams struct {
 }
 
 type UpdateOrderProductParams struct {
+	ID        string  `json:"id"`
 	SKU       string  `json:"sku"`
 	UnitPrice float64 `json:"unitPrice"`
 }
@@ -179,16 +181,24 @@ func (h *OrderHandler) HandleInsertOrder(c *fiber.Ctx) error {
 
 	orderItems := make([]types.OrderItem, len(params.OrderItems))
 	for i, item := range params.OrderItems {
-		productID, err := primitive.ObjectIDFromHex(item.Product.SKU)
+		productID, err := primitive.ObjectIDFromHex(item.Product.ID)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"error": "Invalid product ID",
 			})
 		}
 
+		sku, err := primitive.ObjectIDFromHex(item.Product.SKU)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid product SKU",
+			})
+		}
+
 		orderItems[i] = types.OrderItem{
 			Product: types.OrderProduct{
-				SKU:       productID,
+				ID:        productID,
+				SKU:       sku,
 				UnitPrice: item.Product.UnitPrice,
 			},
 			Quantity:   item.Quantity,
