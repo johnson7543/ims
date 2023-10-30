@@ -80,7 +80,7 @@ func (h *ProcessingItemHandler) HandleGetProcessingItems(c *fiber.Ctx) error {
 	workerID := c.Query("workerId")
 	startDate := c.Query("startDate")
 	endDate := c.Query("endDate")
-	productID := c.Query("sku")
+	productSKU := c.Query("sku")
 	remarks := c.Query("remarks")
 
 	filter := bson.M{}
@@ -147,14 +147,8 @@ func (h *ProcessingItemHandler) HandleGetProcessingItems(c *fiber.Ctx) error {
 			filter["endDate"] = endDateParsed
 		}
 	}
-	if productID != "" {
-		objID, err := primitive.ObjectIDFromHex(productID)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid product ID",
-			})
-		}
-		filter["sku"] = objID
+	if productSKU != "" {
+		filter["sku"] = productSKU
 	}
 	if remarks != "" {
 		filter["remarks"] = remarks
@@ -206,6 +200,7 @@ func (h *ProcessingItemHandler) HandleInsertProcessingItem(c *fiber.Ctx) error {
 		Quantity: params.Quantity,
 		Price:    params.Price,
 		WorkerID: workerID,
+		SKU:      params.SKU,
 		Remarks:  params.Remarks,
 	}
 
@@ -227,16 +222,6 @@ func (h *ProcessingItemHandler) HandleInsertProcessingItem(c *fiber.Ctx) error {
 			})
 		}
 		processingItem.EndDate = endDateParsed
-	}
-
-	if params.SKU != "" {
-		productID, err := primitive.ObjectIDFromHex(params.SKU)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid product ID",
-			})
-		}
-		processingItem.SKU = productID
 	}
 
 	inserted, err := h.store.ProcessingItem.InsertProcessingItem(c.Context(), &processingItem)
@@ -288,6 +273,7 @@ func (h *ProcessingItemHandler) HandleUpdateProcessingItem(c *fiber.Ctx) error {
 		Quantity: params.Quantity,
 		Price:    params.Price,
 		WorkerID: workerID,
+		SKU:      params.SKU,
 		Remarks:  params.Remarks,
 	}
 
@@ -309,16 +295,6 @@ func (h *ProcessingItemHandler) HandleUpdateProcessingItem(c *fiber.Ctx) error {
 			})
 		}
 		updatedProcessingItem.EndDate = endDateParsed
-	}
-
-	if params.SKU != "" {
-		productID, err := primitive.ObjectIDFromHex(params.SKU)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid product ID",
-			})
-		}
-		updatedProcessingItem.SKU = productID
 	}
 
 	updateCount, err := h.store.ProcessingItem.UpdateProcessingItem(c.Context(), processingItemID, &updatedProcessingItem)

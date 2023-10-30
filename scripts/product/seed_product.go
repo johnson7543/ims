@@ -45,6 +45,7 @@ func main() {
 
 	for i := 1; i <= 5; i++ {
 		product := &types.Product{
+			SKU:      fmt.Sprintf("SKU_%d", i),
 			Name:     fmt.Sprintf("Product_%d", i),
 			Material: fmt.Sprintf("Material_%d", i),
 			Color:    fmt.Sprintf("Color_%d", i),

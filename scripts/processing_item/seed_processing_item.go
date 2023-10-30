@@ -48,10 +48,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	sku, err := primitive.ObjectIDFromHex("6523bed323074e8c27b35ec1")
-	if err != nil {
-		log.Fatal(err)
-	}
+
+	sku := "SKU_1"
+
 	for i := 1; i <= 5; i++ {
 		processingItem := &types.ProcessingItem{
 			Name:      fmt.Sprintf("Item_%d", i),

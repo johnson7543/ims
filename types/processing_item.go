@@ -14,6 +14,6 @@ type ProcessingItem struct {
 	WorkerID  primitive.ObjectID `bson:"workerId" json:"workerId"`
 	StartDate time.Time          `bson:"startDate" json:"startDate"`
 	EndDate   time.Time          `bson:"endDate" json:"endDate"`
-	SKU       primitive.ObjectID `bson:"sku" json:"sku"`
+	SKU       string             `bson:"sku" json:"sku"`
 	Remarks   string             `bson:"remarks" json:"remarks"`
 }

@@ -45,11 +45,11 @@ func main() {
 	}
 
 	productIdStrings := []string{
-		"6523bed323074e8c27b35ec1",
-		"6523bed423074e8c27b35ec2",
-		"6523bed423074e8c27b35ec3",
-		"6523bed423074e8c27b35ec4",
-		"6523bed423074e8c27b35ec5",
+		"653f2b14afc3a62643af2ab4",
+		"653f2b14afc3a62643af2ab5",
+		"653f2b14afc3a62643af2ab6",
+		"653f2b14afc3a62643af2ab7",
+		"653f2b15afc3a62643af2ab8",
 	}
 	productIds := make([]primitive.ObjectID, len(productIdStrings))
 	for i, idStr := range productIdStrings {
