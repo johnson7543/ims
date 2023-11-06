@@ -11,6 +11,7 @@ import (
 	_ "github.com/johnson7543/ims/docs"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/joho/godotenv"
 	fiberSwagger "github.com/swaggo/fiber-swagger"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -73,6 +74,13 @@ func main() {
 		auth                  = app.Group("/api")
 		apiv1                 = app.Group("/api/v1", api.JWTAuthentication(userStore))
 	)
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:3000",
+		AllowMethods:     "GET,POST,PUT,PATCH,DELETE",
+		AllowHeaders:     "Content-Type",
+		AllowCredentials: true,
+	}))
 
 	homePage.Get("/", HealthCheckHandler.HandleHealthCheck)
 	healthCheck.Get("/", HealthCheckHandler.HandleHealthCheck)
