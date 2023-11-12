@@ -76,7 +76,7 @@ func main() {
 	)
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "*",
+		AllowOrigins:     "http://1ocalhost:3000",
 		AllowMethods:     "GET,POST,PUT,PATCH,DELETE",
 		AllowCredentials: true,
 	}))
