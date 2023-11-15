@@ -79,7 +79,7 @@ func main() {
 		AllowOrigins:     "*",
 		AllowMethods:     "GET,POST,PUT,PATCH,DELETE,OPTIONS",
 		AllowHeaders:     "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin",
-		AllowCredentials: true,
+		AllowCredentials: false,
 	}))
 
 	app.Options("/*", func(c *fiber.Ctx) error {
