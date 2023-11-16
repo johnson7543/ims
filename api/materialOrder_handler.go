@@ -323,6 +323,36 @@ func (h *MaterialOrderHandler) HandleUpdateMaterialOrder(c *fiber.Ctx) error {
 		}
 	}
 
+	// Decrease material amount if the status changed into cancelled status
+	if strings.ToLower(mo.Status) == "completed" && strings.ToLower(params.Status) == "cancelled" {
+		for _, item := range mo.MaterialOrderItems {
+			m, err := h.store.Material.GetMaterial(c.Context(), item.Material.MaterialID)
+			if err != nil {
+				if err != mongo.ErrNoDocuments {
+					return err
+				}
+
+				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+					"error": "Material doesn't exist, please create the material first.",
+				})
+			}
+
+			material := *m // make a copy
+			material.Quantity -= item.Quantity
+
+			if material.Quantity < 0 {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": "Material quantity would be negative after the order is canceled. Cancellation failed.",
+				})
+			}
+
+			_, err = h.store.Material.UpdateMaterial(c.Context(), item.Material.MaterialID, &material)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	updatedMaterialOrder := types.MaterialOrder{
 		SellerID:    params.SellerID,
 		OrderDate:   orderDateParsed,
