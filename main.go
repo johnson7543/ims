@@ -76,10 +76,10 @@ func main() {
 	)
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "*",
+		AllowOrigins:     "http://localhost:3000",
 		AllowMethods:     "GET,POST,PUT,PATCH,DELETE,OPTIONS",
 		AllowHeaders:     "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin",
-		AllowCredentials: false,
+		AllowCredentials: true,
 	}))
 
 	app.Options("/*", func(c *fiber.Ctx) error {
