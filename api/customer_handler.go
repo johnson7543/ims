@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type InsertWorkerParams struct {
+type InsertCustomerParams struct {
 	Company     string `json:"company"`
 	Name        string `json:"name"`
 	Phone       string `json:"phone"`
@@ -17,11 +17,11 @@ type InsertWorkerParams struct {
 	TaxIdNumber string `json:"taxIdNumber"`
 }
 
-func (p InsertWorkerParams) validate() error {
+func (p InsertCustomerParams) validate() error {
 	return nil
 }
 
-type UpdateWorkerParams struct {
+type UpdateCustomerParams struct {
 	Company     string `json:"company" form:"company"`
 	Name        string `json:"name" form:"name"`
 	Phone       string `json:"phone" form:"phone"`
@@ -29,35 +29,35 @@ type UpdateWorkerParams struct {
 	TaxIdNumber string `json:"taxIdNumber" form:"taxIdNumber"`
 }
 
-func (p *UpdateWorkerParams) validate() error {
+func (p *UpdateCustomerParams) validate() error {
 	return nil
 }
 
-type WorkerHandler struct {
+type CustomerHandler struct {
 	store *db.Store
 }
 
-func NewWorkerHandler(store *db.Store) *WorkerHandler {
-	return &WorkerHandler{
+func NewCustomerHandler(store *db.Store) *CustomerHandler {
+	return &CustomerHandler{
 		store: store,
 	}
 }
 
-// HandleGetWorkers retrieves a list of workers based on query parameters.
+// HandleGetCustomers retrieves a list of customers based on query parameters.
 //
-// @Summary Get workers
-// @Description Retrieves a list of workers based on query parameters.
-// @Tags Worker
-// @Param id query string false "Worker ID"
+// @Summary Get customers
+// @Description Retrieves a list of customers based on query parameters.
+// @Tags Customer
+// @Param id query string false "Customer ID"
 // @Param company query string false "Company name"
-// @Param name query string false "Worker name"
+// @Param name query string false "Customer name"
 // @Param phone query string false "Phone number"
 // @Param address query string false "Address"
 // @Param taxIdNumber query string false "Tax ID number"
 // @Produce json
-// @Success 200 {array} types.Worker
-// @Router /worker [get]
-func (h *WorkerHandler) HandleGetWorkers(c *fiber.Ctx) error {
+// @Success 200 {array} types.Customer
+// @Router /customer [get]
+func (h *CustomerHandler) HandleGetCustomers(c *fiber.Ctx) error {
 	id := c.Query("id")
 	company := c.Query("company")
 	name := c.Query("name")
@@ -71,7 +71,7 @@ func (h *WorkerHandler) HandleGetWorkers(c *fiber.Ctx) error {
 		objID, err := primitive.ObjectIDFromHex(id)
 		if err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid worker ID",
+				"error": "Invalid customer ID",
 			})
 		}
 		filter["_id"] = objID
@@ -92,32 +92,32 @@ func (h *WorkerHandler) HandleGetWorkers(c *fiber.Ctx) error {
 		filter["taxIdNumber"] = taxIdNumber
 	}
 
-	workers, err := h.store.Worker.GetWorkers(c.Context(), filter)
+	customers, err := h.store.Customer.GetCustomers(c.Context(), filter)
 	if err != nil {
 		return err
 	}
 
-	if len(workers) == 0 {
+	if len(customers) == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "No Matches data found",
 		})
 	}
 
-	return c.JSON(workers)
+	return c.JSON(customers)
 }
 
-// HandleInsertWorker inserts a new worker.
+// HandleInsertCustomer inserts a new customer.
 //
-// @Summary Insert worker
-// @Description Inserts a new worker.
-// @Tags Worker
+// @Summary Insert customer
+// @Description Inserts a new customer.
+// @Tags Customer
 // @Accept json
 // @Produce json
-// @Param worker body InsertWorkerParams true "Worker information"
-// @Success 200 {object} types.Worker
-// @Router /worker [post]
-func (h *WorkerHandler) HandleInsertWorker(c *fiber.Ctx) error {
-	var params InsertWorkerParams
+// @Param customer body InsertCustomerParams true "Customer information"
+// @Success 200 {object} types.Customer
+// @Router /customer [post]
+func (h *CustomerHandler) HandleInsertCustomer(c *fiber.Ctx) error {
+	var params InsertCustomerParams
 	if err := c.BodyParser(&params); err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func (h *WorkerHandler) HandleInsertWorker(c *fiber.Ctx) error {
 		return err
 	}
 
-	worker := types.Worker{
+	customer := types.Customer{
 		Company:     params.Company,
 		Name:        params.Name,
 		Phone:       params.Phone,
@@ -134,31 +134,31 @@ func (h *WorkerHandler) HandleInsertWorker(c *fiber.Ctx) error {
 		TaxIdNumber: params.TaxIdNumber,
 	}
 
-	inserted, err := h.store.Worker.InsertWorker(c.Context(), &worker)
+	inserted, err := h.store.Customer.InsertCustomer(c.Context(), &customer)
 	if err != nil {
 		return err
 	}
 	return c.JSON(inserted)
 }
 
-// HandleUpdateWorker updates an existing worker in the system.
-// @Summary Update worker
-// @Description Update an existing worker in the system.
-// @Tags Worker
+// HandleUpdateCustomer updates an existing customer in the system.
+// @Summary Update customer
+// @Description Update an existing customer in the system.
+// @Tags Customer
 // @Accept json
 // @Produce json
-// @Param id path string true "Worker ID"
-// @Param body body UpdateWorkerParams true "Updated worker details"
+// @Param id path string true "Customer ID"
+// @Param body body UpdateCustomerParams true "Updated customer details"
 // @Success 200 {object} fiber.Map
-// @Router /worker/{id} [patch]
-func (h *WorkerHandler) HandleUpdateWorker(c *fiber.Ctx) error {
+// @Router /customer/{id} [patch]
+func (h *CustomerHandler) HandleUpdateCustomer(c *fiber.Ctx) error {
 	id := c.Params("id")
-	workerID, err := primitive.ObjectIDFromHex(id)
+	customerID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
 
-	var params UpdateWorkerParams
+	var params UpdateCustomerParams
 	if err := c.BodyParser(&params); err != nil {
 		return err
 	}
@@ -167,7 +167,7 @@ func (h *WorkerHandler) HandleUpdateWorker(c *fiber.Ctx) error {
 		return err
 	}
 
-	updatedWorker := types.Worker{
+	updatedCustomer := types.Customer{
 		Company:     params.Company,
 		Name:        params.Name,
 		Phone:       params.Phone,
@@ -175,51 +175,51 @@ func (h *WorkerHandler) HandleUpdateWorker(c *fiber.Ctx) error {
 		TaxIdNumber: params.TaxIdNumber,
 	}
 
-	updateCount, err := h.store.Worker.UpdateWorker(c.Context(), workerID, &updatedWorker)
+	updateCount, err := h.store.Customer.UpdateCustomer(c.Context(), customerID, &updatedCustomer)
 	if err != nil {
 		return err
 	}
 
 	if updateCount == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Worker not found",
+			"error": "Customer not found",
 		})
 	}
 	return c.JSON(fiber.Map{
-		"message": "Worker updated successfully",
+		"message": "Customer updated successfully",
 	})
 }
 
-// HandleDeleteWorker deletes a worker by ID.
+// HandleDeleteCustomer deletes a customer by ID.
 //
-// @Summary Delete worker
-// @Description Deletes a worker by ID.
-// @Tags Worker
-// @Param id path string true "Worker ID"
+// @Summary Delete customer
+// @Description Deletes a customer by ID.
+// @Tags Customer
+// @Param id path string true "Customer ID"
 // @Produce json
 // @Success 200 {object} fiber.Map
-// @Router /worker/{id} [delete]
-func (h *WorkerHandler) HandleDeleteWorker(c *fiber.Ctx) error {
-	workerID := c.Params("id")
+// @Router /customer/{id} [delete]
+func (h *CustomerHandler) HandleDeleteCustomer(c *fiber.Ctx) error {
+	customerID := c.Params("id")
 
-	objID, err := primitive.ObjectIDFromHex(workerID)
+	objID, err := primitive.ObjectIDFromHex(customerID)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid worker ID",
+			"error": "Invalid customer ID",
 		})
 	}
 
-	deleteCount, err := h.store.Worker.DeleteWorker(c.Context(), objID)
+	deleteCount, err := h.store.Customer.DeleteCustomer(c.Context(), objID)
 	if err != nil {
 		return err
 	}
 	if deleteCount == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Material not found",
+			"error": "Customer not found",
 		})
 	}
 
 	return c.JSON(fiber.Map{
-		"message": "Worker deleted successfully",
+		"message": "Customer deleted successfully",
 	})
 }

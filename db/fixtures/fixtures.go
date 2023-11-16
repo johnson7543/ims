@@ -41,6 +41,22 @@ func AddWorker(store *db.Store, worker *types.Worker) *types.Worker {
 	return insertedWorker
 }
 
+func AddCustomer(store *db.Store, customer *types.Customer) *types.Customer {
+	insertedCustomer, err := store.Customer.InsertCustomer(context.Background(), customer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return insertedCustomer
+}
+
+func AddSeller(store *db.Store, seller *types.Seller) *types.Seller {
+	insertedSeller, err := store.Seller.InsertSeller(context.Background(), seller)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return insertedSeller
+}
+
 func AddMaterial(store *db.Store, material *types.Material) *types.Material {
 	insertedMaterial, err := store.Material.InsertMaterial(context.Background(), material)
 	if err != nil {

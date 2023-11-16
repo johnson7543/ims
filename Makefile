@@ -13,6 +13,12 @@ seed_material:
 seed_worker:
 	@go run scripts/worker/seed_worker.go
 
+seed_customer:
+	@go run scripts/customer/seed_customer.go
+	
+seed_seller:
+	@go run scripts/seller/seed_seller.go
+
 seed_product:
 	@go run scripts/product/seed_product.go
 

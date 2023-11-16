@@ -13,6 +13,8 @@ type Store struct {
 	Material       MaterialStore
 	MaterialOrder  MaterialOrderStore
 	Worker         WorkerStore
+	Customer       CustomerStore
+	Seller         SellerStore
 	Product        ProductStore
 	ProcessingItem ProcessingItemStore
 	Order          OrderStore

@@ -47,6 +47,8 @@ func main() {
 		materialStore       = db.NewMongoMaterialStore(client)
 		materialOrderStore  = db.NewMongoMaterialOrderStore(client)
 		workerStore         = db.NewMongoWorkerStore(client)
+		customerStore       = db.NewMongoCustomerStore(client)
+		sellerStore         = db.NewMongoSellerStore(client)
 		porcessingItemStore = db.NewMongoProcessingItemStore(client)
 		productStore        = db.NewMongoProductStore(client)
 		orderStore          = db.NewMongoOrderStore(client)
@@ -56,6 +58,8 @@ func main() {
 			Material:       materialStore,
 			MaterialOrder:  materialOrderStore,
 			Worker:         workerStore,
+			Customer:       customerStore,
+			Seller:         sellerStore,
 			ProcessingItem: porcessingItemStore,
 			Product:        productStore,
 			Order:          orderStore,
@@ -65,6 +69,8 @@ func main() {
 		materialHandler       = api.NewMaterialHandler(store)
 		materialOrderHandler  = api.NewMaterialOrderHandler(store)
 		workerHandler         = api.NewWorkerHandler(store)
+		customerHandler       = api.NewCustomerHandler(store)
+		sellerHandler         = api.NewSellerHandler(store)
 		processingItemHandler = api.NewProcessingItemHandler(store)
 		productHandler        = api.NewProductHandler(store)
 		orderHandler          = api.NewOrderHandler(store)
@@ -107,6 +113,16 @@ func main() {
 	apiv1.Post("/worker", workerHandler.HandleInsertWorker)
 	apiv1.Patch("/worker/:id", workerHandler.HandleUpdateWorker)
 	apiv1.Delete("/worker/:id", workerHandler.HandleDeleteWorker)
+
+	apiv1.Get("/customer", customerHandler.HandleGetCustomers)
+	apiv1.Post("/customer", customerHandler.HandleInsertCustomer)
+	apiv1.Patch("/customer/:id", customerHandler.HandleUpdateCustomer)
+	apiv1.Delete("/customer/:id", customerHandler.HandleDeleteCustomer)
+
+	apiv1.Get("/seller", sellerHandler.HandleGetSellers)
+	apiv1.Post("/seller", sellerHandler.HandleInsertSeller)
+	apiv1.Patch("/seller/:id", sellerHandler.HandleUpdateSeller)
+	apiv1.Delete("/seller/:id", sellerHandler.HandleDeleteSeller)
 
 	apiv1.Get("/processingItem", processingItemHandler.HandleGetProcessingItems)
 	apiv1.Post("/processingItem", processingItemHandler.HandleInsertProcessingItem)
