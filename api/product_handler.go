@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -169,15 +170,35 @@ func (h *ProductHandler) HandleInsertProduct(c *fiber.Ctx) error {
 		return err
 	}
 
-	skuExists, err := h.store.Product.CheckExistedSKU(c.Context(), params.SKU)
-	if err != nil {
-		return err
-	}
+	if params.SKU == "" {
+		for {
+			// Generate SKU based on product name, color, size, material
+			unixTimeString := strconv.FormatInt(time.Now().Unix(), 10)
+			params.SKU = fmt.Sprintf("%s-%s-%s-%s-%s", params.Name, params.Color, params.Size, params.Material, unixTimeString)
 
-	if skuExists {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "SKU is already in use by others",
-		})
+			skuExists, err := h.store.Product.CheckExistedSKU(c.Context(), params.SKU)
+			if err != nil {
+				return err
+			}
+
+			if !skuExists {
+				break
+			}
+
+			// If SKU already exists, regenerate
+		}
+	} else {
+		// SKU was created by user
+		skuExists, err := h.store.Product.CheckExistedSKU(c.Context(), params.SKU)
+		if err != nil {
+			return err
+		}
+
+		if skuExists {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "SKU is already in use by others",
+			})
+		}
 	}
 
 	product := types.Product{
