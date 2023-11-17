@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -290,35 +291,19 @@ func (h *MaterialOrderHandler) HandleUpdateMaterialOrder(c *fiber.Ctx) error {
 
 	// update materail information if the status changed into completed status
 	if strings.ToLower(mo.Status) != "completed" && strings.ToLower(params.Status) == "completed" {
-		// update all material items in the materil order
+		// update all material items in the material order
 		for _, item := range mo.MaterialOrderItems {
-			m, err := h.store.Material.GetMaterial(c.Context(), item.Material.MaterialID)
+			updatedCount, err := h.store.Material.IncreaseMaterialQuantity(c.Context(), item.Material.MaterialID, item.Quantity)
 			if err != nil {
-				if err != mongo.ErrNoDocuments {
-					return err
-				}
-
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"error": "Material doesn't exist, please create the material first.",
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": fmt.Sprintf("Failed to increase material %s by %d, %s", item.Material.MaterialID, item.Quantity, err.Error()),
 				})
 			}
 
-			material := *m // make a copy
-			material.Name = item.Material.Name
-			material.Color = item.Material.Color
-			material.Size = item.Material.Size
-			material.Quantity += item.Quantity
-			material.Remarks = item.Material.Remarks
-
-			priceHistoryEntry := types.PriceHistoryEntry{
-				Price:     item.Material.Price,
-				UpdatedAt: orderDateParsed,
-			}
-			material.PriceHistory = append(material.PriceHistory, priceHistoryEntry)
-
-			_, err = h.store.Material.UpdateMaterial(c.Context(), item.Material.MaterialID, &material)
-			if err != nil {
-				return err
+			if updatedCount == 0 {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": fmt.Sprintf("Failed to increase material %s by %d", item.Material.MaterialID, item.Quantity),
+				})
 			}
 		}
 	}
@@ -326,29 +311,17 @@ func (h *MaterialOrderHandler) HandleUpdateMaterialOrder(c *fiber.Ctx) error {
 	// Decrease material amount if the status changed into cancelled status
 	if strings.ToLower(mo.Status) == "completed" && strings.ToLower(params.Status) == "cancelled" {
 		for _, item := range mo.MaterialOrderItems {
-			m, err := h.store.Material.GetMaterial(c.Context(), item.Material.MaterialID)
+			updatedCount, err := h.store.Material.DecreaseMaterialQuantity(c.Context(), item.Material.MaterialID, item.Quantity)
 			if err != nil {
-				if err != mongo.ErrNoDocuments {
-					return err
-				}
-
-				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"error": "Material doesn't exist, please create the material first.",
-				})
-			}
-
-			material := *m // make a copy
-			material.Quantity -= item.Quantity
-
-			if material.Quantity < 0 {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"error": "Material quantity would be negative after the order is canceled. Cancellation failed.",
+					"error": fmt.Sprintf("Failed to decrease material %s by %d, %s", item.Material.MaterialID, item.Quantity, err.Error()),
 				})
 			}
 
-			_, err = h.store.Material.UpdateMaterial(c.Context(), item.Material.MaterialID, &material)
-			if err != nil {
-				return err
+			if updatedCount == 0 {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": fmt.Sprintf("Failed to decrease material %s by %d", item.Material.MaterialID, item.Quantity),
+				})
 			}
 		}
 	}

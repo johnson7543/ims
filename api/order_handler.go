@@ -233,13 +233,13 @@ func (h *OrderHandler) HandleInsertOrder(c *fiber.Ctx) error {
 		updatedCount, err := h.store.Product.DecreaseProductQuantity(c.Context(), productID, item.Quantity)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": fmt.Sprintf("Failed to update quantity for product %s", productID),
+				"error": fmt.Sprintf("Failed to decrease product %s by %d, %s", item.Product.ID, item.Quantity, err.Error()),
 			})
 		}
 
 		if updatedCount == 0 {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": fmt.Sprintf("Failed to update quantity for product %s with quantity %d", productID, item.Quantity),
+				"error": fmt.Sprintf("Failed to decrease product %s by %d", item.Product.ID, item.Quantity),
 			})
 		}
 
@@ -358,13 +358,13 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 			updatedCount, err := h.store.Product.IncreaseProductQuantity(c.Context(), item.Product.ID, item.Quantity)
 			if err != nil {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"error": fmt.Sprintf("Failed to update quantity for product %s", item.Product.ID),
+					"error": fmt.Sprintf("Failed to increase product %s by %d, %s", item.Product.ID, item.Quantity, err.Error()),
 				})
 			}
 
 			if updatedCount == 0 {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"error": fmt.Sprintf("Failed to update quantity for product %s with quantity %d", item.Product.ID, item.Quantity),
+					"error": fmt.Sprintf("Failed to increase product %s by %d", item.Product.ID, item.Quantity),
 				})
 			}
 		}

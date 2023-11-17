@@ -161,7 +161,7 @@ func (s *MongoProductStore) CheckDuplicateSKU(ctx context.Context, sku string, p
 }
 
 func (s *MongoProductStore) DecreaseProductQuantity(ctx context.Context, productID primitive.ObjectID, quantity int) (int64, error) {
-	filter := bson.M{"_id": productID, "quantity": bson.M{"$gte": quantity}}
+	filter := bson.M{"_id": productID}
 
 	update := bson.M{
 		"$inc": bson.M{"quantity": -quantity},

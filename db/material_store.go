@@ -22,6 +22,8 @@ type MaterialStore interface {
 	DeleteMaterial(context.Context, primitive.ObjectID) (int64, error)
 	GetMaterialColors(context.Context) ([]string, error)
 	GetMaterialSizes(context.Context) ([]string, error)
+	DecreaseMaterialQuantity(ctx context.Context, materialID primitive.ObjectID, quantity int) (int64, error)
+	IncreaseMaterialQuantity(ctx context.Context, materialID primitive.ObjectID, quantity int) (int64, error)
 }
 
 type MongoMaterialStore struct {
@@ -142,4 +144,32 @@ func (s *MongoMaterialStore) GetMaterialSizes(ctx context.Context) ([]string, er
 	}
 
 	return sizeStrings, nil
+}
+
+func (s *MongoMaterialStore) DecreaseMaterialQuantity(ctx context.Context, materialID primitive.ObjectID, quantity int) (int64, error) {
+	filter := bson.M{"_id": materialID, "quantity": bson.M{"$gte": quantity}}
+	update := bson.M{
+		"$inc": bson.M{"quantity": -quantity},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
+}
+
+func (s *MongoMaterialStore) IncreaseMaterialQuantity(ctx context.Context, materialID primitive.ObjectID, quantity int) (int64, error) {
+	filter := bson.M{"_id": materialID}
+	update := bson.M{
+		"$inc": bson.M{"quantity": quantity},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
 }
