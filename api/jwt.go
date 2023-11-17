@@ -14,6 +14,11 @@ import (
 
 func JWTAuthentication(userStore db.UserStore) fiber.Handler {
 	return func(c *fiber.Ctx) error {
+		// Skip JWT authentication for OPTIONS requests
+		if c.Method() == fiber.MethodOptions {
+			return c.Next()
+		}
+
 		token, ok := c.GetReqHeaders()["X-Api-Token"]
 		if !ok {
 			fmt.Println("token not present in the header")
