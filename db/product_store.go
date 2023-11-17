@@ -22,6 +22,8 @@ type ProductStore interface {
 	GetProductSizes(ctx context.Context) ([]string, error)
 	CheckExistedSKU(ctx context.Context, sku string) (bool, error)
 	CheckDuplicateSKU(ctx context.Context, sku string, productID primitive.ObjectID) (bool, error)
+	DecreaseProductQuantity(ctx context.Context, productID primitive.ObjectID, quantity int) (int64, error)
+	IncreaseProductQuantity(ctx context.Context, productID primitive.ObjectID, quantity int) (int64, error)
 }
 
 type MongoProductStore struct {
@@ -156,4 +158,33 @@ func (s *MongoProductStore) CheckDuplicateSKU(ctx context.Context, sku string, p
 	}
 
 	return count > 0, nil
+}
+
+func (s *MongoProductStore) DecreaseProductQuantity(ctx context.Context, productID primitive.ObjectID, quantity int) (int64, error) {
+	filter := bson.M{"_id": productID, "quantity": bson.M{"$gte": quantity}}
+
+	update := bson.M{
+		"$inc": bson.M{"quantity": -quantity},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
+}
+
+func (s *MongoProductStore) IncreaseProductQuantity(ctx context.Context, productID primitive.ObjectID, quantity int) (int64, error) {
+	filter := bson.M{"_id": productID}
+	update := bson.M{
+		"$inc": bson.M{"quantity": quantity},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
 }

@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/johnson7543/ims/db"
@@ -218,6 +220,31 @@ func (h *OrderHandler) HandleInsertOrder(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
+	// Decrease product quantities after successfully inserting the order
+	for _, item := range params.OrderItems {
+		productID, err := primitive.ObjectIDFromHex(item.Product.ID)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": fmt.Sprintf("Invalid product ID: %s", item.Product.ID),
+			})
+		}
+
+		updatedCount, err := h.store.Product.DecreaseProductQuantity(c.Context(), productID, item.Quantity)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": fmt.Sprintf("Failed to update quantity for product %s", productID),
+			})
+		}
+
+		if updatedCount == 0 {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": fmt.Sprintf("Failed to update quantity for product %s with quantity %d", productID, item.Quantity),
+			})
+		}
+
+	}
+
 	return c.JSON(inserted)
 }
 
@@ -319,6 +346,28 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "Order not found",
 		})
+	}
+
+	existingOrder, err := h.store.Order.GetOrders(c.Context(), bson.M{"_id": orderID})
+	if err != nil {
+		return err
+	}
+
+	if strings.ToLower(existingOrder[0].Status) != "canceled" && strings.ToLower(params.Status) == "canceled" {
+		for _, item := range orderItems {
+			updatedCount, err := h.store.Product.IncreaseProductQuantity(c.Context(), item.Product.ID, item.Quantity)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": fmt.Sprintf("Failed to update quantity for product %s", item.Product.ID),
+				})
+			}
+
+			if updatedCount == 0 {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": fmt.Sprintf("Failed to update quantity for product %s with quantity %d", item.Product.ID, item.Quantity),
+				})
+			}
+		}
 	}
 
 	return c.JSON(fiber.Map{
