@@ -96,6 +96,12 @@ func (h *SellerHandler) HandleGetSellers(c *fiber.Ctx) error {
 		return err
 	}
 
+	if len(sellers) == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "No Matches data found",
+		})
+	}
+
 	return c.JSON(sellers)
 }
 
