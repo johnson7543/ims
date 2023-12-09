@@ -231,7 +231,7 @@ func (h *ProcessingItemHandler) HandleInsertProcessingItem(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"message": fmt.Sprintf("ProcessingItem inserted successfully, ID: %s, Name: %s", inserted.ID, inserted.Name),
+		"message": fmt.Sprintf("ProcessingItem inserted successfully, ID: %s, Name: %s", inserted.ID.Hex(), inserted.Name),
 	})
 }
 

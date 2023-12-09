@@ -243,7 +243,7 @@ func (h *MaterialOrderHandler) HandleInsertMaterialOrder(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"message": fmt.Sprintf("MaterialOrder inserted successfully, ID: %s, TotalAmount: %f", inserted.ID, inserted.TotalAmount),
+		"message": fmt.Sprintf("MaterialOrder inserted successfully, ID: %s, TotalAmount: %f", inserted.ID.Hex(), inserted.TotalAmount),
 	})
 }
 

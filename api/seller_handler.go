@@ -141,7 +141,7 @@ func (h *SellerHandler) HandleInsertSeller(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"message": fmt.Sprintf("Seller inserted successfully, ID: %s, Name: %s", inserted.ID, inserted.Name),
+		"message": fmt.Sprintf("Seller inserted successfully, ID: %s, Name: %s", inserted.ID.Hex(), inserted.Name),
 	})
 }
 
