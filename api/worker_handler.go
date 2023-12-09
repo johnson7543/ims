@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/johnson7543/ims/db"
 	"github.com/johnson7543/ims/types"
 
@@ -138,7 +140,10 @@ func (h *WorkerHandler) HandleInsertWorker(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(inserted)
+
+	return c.JSON(fiber.Map{
+		"message": fmt.Sprintf("Worker inserted successfully, ID: %s, Name: %s", inserted.ID, inserted.Name),
+	})
 }
 
 // HandleUpdateWorker updates an existing worker in the system.

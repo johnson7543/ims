@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/johnson7543/ims/db"
 	"github.com/johnson7543/ims/types"
@@ -137,7 +139,10 @@ func (h *SellerHandler) HandleInsertSeller(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(inserted)
+
+	return c.JSON(fiber.Map{
+		"message": fmt.Sprintf("Seller inserted successfully, ID: %s, Name: %s", inserted.ID, inserted.Name),
+	})
 }
 
 // HandleUpdateSeller updates an existing seller in the system.

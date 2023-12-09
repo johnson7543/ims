@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -229,7 +230,9 @@ func (h *ProcessingItemHandler) HandleInsertProcessingItem(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(inserted)
+	return c.JSON(fiber.Map{
+		"message": fmt.Sprintf("ProcessingItem inserted successfully, ID: %s, Name: %s", inserted.ID, inserted.Name),
+	})
 }
 
 // HandleUpdateProcessingItem updates an existing processing item in the system.

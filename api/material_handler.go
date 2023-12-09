@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/johnson7543/ims/db"
@@ -168,7 +169,10 @@ func (h *MaterialHandler) HandleInsertMaterial(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(inserted)
+
+	return c.JSON(fiber.Map{
+		"message": fmt.Sprintf("Material inserted successfully, ID: %s, Name: %s", inserted.ID, inserted.Name),
+	})
 }
 
 // HandleUpdateMaterial updates an existing material in the system.

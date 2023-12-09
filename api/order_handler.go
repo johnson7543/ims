@@ -245,7 +245,9 @@ func (h *OrderHandler) HandleInsertOrder(c *fiber.Ctx) error {
 
 	}
 
-	return c.JSON(inserted)
+	return c.JSON(fiber.Map{
+		"message": fmt.Sprintf("Order inserted successfully, ID: %s, TotalAmount: %f", inserted.ID, inserted.TotalAmount),
+	})
 }
 
 // HandleUpdateOrder updates an existing order in the system.

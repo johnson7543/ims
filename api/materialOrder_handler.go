@@ -242,7 +242,9 @@ func (h *MaterialOrderHandler) HandleInsertMaterialOrder(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.JSON(inserted)
+	return c.JSON(fiber.Map{
+		"message": fmt.Sprintf("MaterialOrder inserted successfully, ID: %s, TotalAmount: %f", inserted.ID, inserted.TotalAmount),
+	})
 }
 
 // HandleUpdateMaterialOrder updates an existing material order in the system.

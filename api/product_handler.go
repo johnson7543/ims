@@ -226,7 +226,10 @@ func (h *ProductHandler) HandleInsertProduct(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(inserted)
+
+	return c.JSON(fiber.Map{
+		"message": fmt.Sprintf("Product inserted successfully, ID: %s, Name: %s", inserted.ID, inserted.Name),
+	})
 }
 
 // HandleUpdateProduct updates an existing product in the system.
