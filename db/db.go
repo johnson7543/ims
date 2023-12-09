@@ -14,6 +14,7 @@ type Store struct {
 	MaterialOrder  MaterialOrderStore
 	Worker         WorkerStore
 	Customer       CustomerStore
+	Buyer          BuyerStore
 	Seller         SellerStore
 	Product        ProductStore
 	ProcessingItem ProcessingItemStore

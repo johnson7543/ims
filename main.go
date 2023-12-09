@@ -48,6 +48,7 @@ func main() {
 		materialOrderStore  = db.NewMongoMaterialOrderStore(client)
 		workerStore         = db.NewMongoWorkerStore(client)
 		customerStore       = db.NewMongoCustomerStore(client)
+		buyerStore          = db.NewMongoBuyerStore(client)
 		sellerStore         = db.NewMongoSellerStore(client)
 		porcessingItemStore = db.NewMongoProcessingItemStore(client)
 		productStore        = db.NewMongoProductStore(client)
@@ -59,6 +60,7 @@ func main() {
 			MaterialOrder:  materialOrderStore,
 			Worker:         workerStore,
 			Customer:       customerStore,
+			Buyer:          buyerStore,
 			Seller:         sellerStore,
 			ProcessingItem: porcessingItemStore,
 			Product:        productStore,
@@ -70,6 +72,7 @@ func main() {
 		materialOrderHandler  = api.NewMaterialOrderHandler(store)
 		workerHandler         = api.NewWorkerHandler(store)
 		customerHandler       = api.NewCustomerHandler(store)
+		buyerHandler          = api.NewBuyerHandler(store)
 		sellerHandler         = api.NewSellerHandler(store)
 		processingItemHandler = api.NewProcessingItemHandler(store)
 		productHandler        = api.NewProductHandler(store)
@@ -118,6 +121,11 @@ func main() {
 	apiv1.Post("/customer", customerHandler.HandleInsertCustomer)
 	apiv1.Patch("/customer/:id", customerHandler.HandleUpdateCustomer)
 	apiv1.Delete("/customer/:id", customerHandler.HandleDeleteCustomer)
+
+	apiv1.Get("/buyer", buyerHandler.HandleGetBuyers)
+	apiv1.Post("/buyer", buyerHandler.HandleInsertBuyer)
+	apiv1.Patch("/buyer/:id", buyerHandler.HandleUpdateBuyer)
+	apiv1.Delete("/buyer/:id", buyerHandler.HandleDeleteBuyer)
 
 	apiv1.Get("/seller", sellerHandler.HandleGetSellers)
 	apiv1.Post("/seller", sellerHandler.HandleInsertSeller)

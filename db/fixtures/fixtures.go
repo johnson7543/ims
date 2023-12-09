@@ -57,6 +57,14 @@ func AddSeller(store *db.Store, seller *types.Seller) *types.Seller {
 	return insertedSeller
 }
 
+func AddBuyer(store *db.Store, buyer *types.Buyer) *types.Buyer {
+	insertedBuyer, err := store.Buyer.InsertBuyer(context.Background(), buyer)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return insertedBuyer
+}
+
 func AddMaterial(store *db.Store, material *types.Material) *types.Material {
 	insertedMaterial, err := store.Material.InsertMaterial(context.Background(), material)
 	if err != nil {

@@ -19,6 +19,9 @@ seed_customer:
 seed_seller:
 	@go run scripts/seller/seed_seller.go
 
+seed_buyer:
+	@go run scripts/buyer/seed_buyer.go
+
 seed_product:
 	@go run scripts/product/seed_product.go
 
