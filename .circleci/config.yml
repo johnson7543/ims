@@ -1,27 +1,20 @@
 version: 2.1
 
 orbs:
-  aws-cli: circleci/aws-cli@4.1.1
+  aws-cli: circleci/aws-cli@4.1.2
   aws-ecr: circleci/aws-ecr@9.0
   aws-ecs: circleci/aws-ecs@4.0
-
-jobs:
-  aws-cli-init:
-    executor: aws-cli/default
-    steps:
-      - checkout
-      - aws-cli/setup:
-          role_arn: arn:aws:iam::418741758261:role/Circleci_orbs_cli_ecr_ecs_role
-          role_session_name: circleci-session
 
 workflows:
   build-and-deploy:
     jobs:
       - aws-ecr/build_and_push_image:
-          context: aws-dev # config in circleci context page
+          account_id: ${AWS_ACCOUNT_ID}
           auth:
-            - aws-cli-init:
-                context: aws
+            - aws-cli/setup:
+                role_arn: arn:aws:iam::418741758261:role/Circleci_orbs_cli_ecr_ecs_role
+                role_session_name: circleci-session
+          context: aws-dev # config in circleci context page
           create_repo: true
           dockerfile: Dockerfile
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
@@ -30,8 +23,9 @@ workflows:
       - aws-ecs/deploy_service_update:
           context: aws-dev
           auth:
-            - aws-cli-init:
-                context: aws
+            - aws-cli/setup:
+                role_arn: arn:aws:iam::418741758261:role/Circleci_orbs_cli_ecr_ecs_role
+                role_session_name: circleci-session
           cluster: ${AWS_RESOURCE_NAME_PREFIX}-cluster
           container_image_name_updates: container=${AWS_RESOURCE_NAME_PREFIX}-service,tag=${CIRCLE_SHA1}
           family: ${AWS_RESOURCE_NAME_PREFIX}-service
