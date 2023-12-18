@@ -12,7 +12,7 @@ workflows:
           account_id: ${AWS_ACCOUNT_ID}
           auth:
             - aws-cli/setup:
-                role_arn: arn:aws:iam::418741758261:role/Circleci_orbs_cli_ecr_ecs_role
+                role_arn: arn:aws:iam::${AWS_ACCOUNT_ID}:role/Circleci_orbs_cli_ecr_ecs_role
                 role_session_name: circleci-session
           context: aws-dev # config in circleci context page
           create_repo: true
@@ -25,7 +25,7 @@ workflows:
           context: aws-dev
           auth:
             - aws-cli/setup:
-                role_arn: arn:aws:iam::418741758261:role/Circleci_orbs_cli_ecr_ecs_role
+                role_arn: arn:aws:iam::${AWS_ACCOUNT_ID}:role/Circleci_orbs_cli_ecr_ecs_role
                 role_session_name: circleci-session
           cluster: ${AWS_RESOURCE_NAME_PREFIX}-cluster
           container_image_name_updates: container=${AWS_RESOURCE_NAME_PREFIX}-service,tag=${CIRCLE_SHA1}
