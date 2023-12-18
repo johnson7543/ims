@@ -17,9 +17,10 @@ workflows:
           context: aws-dev # config in circleci context page
           create_repo: true
           dockerfile: Dockerfile
+          extra_build_args: "--build-arg ENV_MONGO_DB_PASSWORD=${ENV_MONGO_DB_PASSWORD}"
+          region: ${AWS_DEFAULT_REGION}
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           tag: "${CIRCLE_SHA1}"
-          extra_build_args: "--build-arg ENV_MONGO_DB_PASSWORD=${ENV_MONGO_DB_PASSWORD}"
       - aws-ecs/deploy_service_update:
           context: aws-dev
           auth:
