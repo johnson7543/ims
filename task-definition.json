@@ -1,9 +1,9 @@
 {
-    "family": "ims-service",
+    "family": "circleci-service",
     "containerDefinitions": [
         {
-            "name": "ims-service",
-            "image": "248679804578.dkr.ecr.ap-northeast-1.amazonaws.com/ims:latest",
+            "name": "circleci-service",
+            "image": "418741758261.dkr.ecr.ap-northeast-1.amazonaws.com/circleci-demo:latest",
             "cpu": 128,
             "memoryReservation": 128,
             "portMappings": [
