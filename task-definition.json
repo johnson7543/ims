@@ -3,7 +3,7 @@
     "containerDefinitions": [
         {
             "name": "circleci-service",
-            "image": "418741758261.dkr.ecr.ap-northeast-1.amazonaws.com/circleci-demo:latest",
+            "image": "418741758261.dkr.ecr.ap-northeast-1.amazonaws.com/circleci:latest",
             "cpu": 128,
             "memoryReservation": 128,
             "portMappings": [
