@@ -13,7 +13,7 @@
                 }
             ],
             "command": [
-                "./ims"
+                "./main"
             ],
             "essential": true
         }
