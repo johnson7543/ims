@@ -20,8 +20,9 @@ type MaterialStore interface {
 	InsertMaterial(context.Context, *types.Material) (*types.Material, error)
 	UpdateMaterial(context.Context, primitive.ObjectID, *types.Material) (int64, error)
 	DeleteMaterial(context.Context, primitive.ObjectID) (int64, error)
-	GetMaterialColors(context.Context) ([]string, error)
-	GetMaterialSizes(context.Context) ([]string, error)
+	GetMaterialColors(context.Context, string) ([]string, error)
+	GetMaterialTypes(context.Context) ([]string, error)
+	GetMaterialSizes(context.Context, string) ([]string, error)
 	DecreaseMaterialQuantity(ctx context.Context, materialID primitive.ObjectID, quantity int) (int64, error)
 	IncreaseMaterialQuantity(ctx context.Context, materialID primitive.ObjectID, quantity int) (int64, error)
 }
@@ -114,8 +115,13 @@ func (s *MongoMaterialStore) DeleteMaterial(ctx context.Context, id primitive.Ob
 	return deleteResult.DeletedCount, err
 }
 
-func (s *MongoMaterialStore) GetMaterialColors(ctx context.Context) ([]string, error) {
-	colors, err := s.coll.Distinct(ctx, "color", bson.M{})
+func (s *MongoMaterialStore) GetMaterialColors(ctx context.Context, materialType string) ([]string, error) {
+	filter := bson.M{}
+	if materialType != "" {
+		filter["type"] = materialType
+	}
+
+	colors, err := s.coll.Distinct(ctx, "color", filter)
 	if err != nil {
 		return nil, err
 	}
@@ -130,8 +136,29 @@ func (s *MongoMaterialStore) GetMaterialColors(ctx context.Context) ([]string, e
 	return colorStrings, nil
 }
 
-func (s *MongoMaterialStore) GetMaterialSizes(ctx context.Context) ([]string, error) {
-	sizes, err := s.coll.Distinct(ctx, "size", bson.M{})
+func (s *MongoMaterialStore) GetMaterialTypes(ctx context.Context) ([]string, error) {
+	types, err := s.coll.Distinct(ctx, "type", bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	var typeStrings []string
+	for _, t := range types {
+		if typeStr, ok := t.(string); ok {
+			typeStrings = append(typeStrings, typeStr)
+		}
+	}
+
+	return typeStrings, nil
+}
+
+func (s *MongoMaterialStore) GetMaterialSizes(ctx context.Context, materialType string) ([]string, error) {
+	filter := bson.M{}
+	if materialType != "" {
+		filter["type"] = materialType
+	}
+
+	sizes, err := s.coll.Distinct(ctx, "size", filter)
 	if err != nil {
 		return nil, err
 	}

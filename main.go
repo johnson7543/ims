@@ -105,6 +105,7 @@ func main() {
 	apiv1.Patch("/material/:id", materialHandler.HandleUpdateMaterial)
 	apiv1.Delete("/material/:id", materialHandler.HandleDeleteMaterial)
 	apiv1.Get("/material/colors", materialHandler.HandleGetMaterialColors)
+	apiv1.Get("/material/types", materialHandler.HandleGetMaterialTypes)
 	apiv1.Get("/material/sizes", materialHandler.HandleGetMaterialSizes)
 
 	apiv1.Get("/materialOrder", materialOrderHandler.HandleGetMaterialOrders)
@@ -141,6 +142,9 @@ func main() {
 	apiv1.Post("/product", productHandler.HandleInsertProduct)
 	apiv1.Patch("/product/:id", productHandler.HandleUpdateProduct)
 	apiv1.Delete("/product/:id", productHandler.HandleDeleteProduct)
+	apiv1.Get("/product/colors", productHandler.HandleGetProductColors)
+	apiv1.Get("/product/types", productHandler.HandleGetProductTypes)
+	apiv1.Get("/product/sizes", productHandler.HandleGetProductSizes)
 
 	apiv1.Get("/order", orderHandler.HandleGetOrders)
 	apiv1.Post("/order", orderHandler.HandleInsertOrder)

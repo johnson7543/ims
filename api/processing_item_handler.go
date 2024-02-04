@@ -14,14 +14,15 @@ import (
 )
 
 type InsertProcessingItemParams struct {
-	Name      string  `json:"name"`
-	Quantity  int     `json:"quantity"`
-	Price     float64 `json:"price"`
-	WorkerID  string  `json:"workerId"`
-	StartDate string  `json:"startDate"`
-	EndDate   string  `json:"endDate"`
-	SKU       string  `json:"sku"`
-	Remarks   string  `json:"remarks"`
+	Name       string  `json:"name"`
+	Quantity   int     `json:"quantity"`
+	Price      float64 `json:"price"`
+	WorkerID   string  `json:"workerId"`
+	WorkerName string  `json:"workerName"`
+	StartDate  string  `json:"startDate"`
+	EndDate    string  `json:"endDate"`
+	SKU        string  `json:"sku"`
+	Remarks    string  `json:"remarks"`
 }
 
 func (p InsertProcessingItemParams) validate() error {
@@ -30,14 +31,15 @@ func (p InsertProcessingItemParams) validate() error {
 }
 
 type UpdateProcessingItemParams struct {
-	Name      string  `json:"name"`
-	Quantity  int     `json:"quantity"`
-	Price     float64 `json:"price"`
-	WorkerID  string  `json:"workerId"`
-	StartDate string  `json:"start_date"`
-	EndDate   string  `json:"end_date"`
-	SKU       string  `json:"sku"`
-	Remarks   string  `json:"remarks"`
+	Name       string  `json:"name"`
+	Quantity   int     `json:"quantity"`
+	Price      float64 `json:"price"`
+	WorkerID   string  `json:"workerId"`
+	WorkerName string  `json:"workerName"`
+	StartDate  string  `json:"start_date"`
+	EndDate    string  `json:"end_date"`
+	SKU        string  `json:"sku"`
+	Remarks    string  `json:"remarks"`
 }
 
 func (p *UpdateProcessingItemParams) validate() error {
@@ -79,6 +81,7 @@ func (h *ProcessingItemHandler) HandleGetProcessingItems(c *fiber.Ctx) error {
 	quantity := c.Query("quantity")
 	price := c.Query("price")
 	workerID := c.Query("workerId")
+	workerName := c.Query("workerName")
 	startDate := c.Query("startDate")
 	endDate := c.Query("endDate")
 	productSKU := c.Query("sku")
@@ -124,6 +127,9 @@ func (h *ProcessingItemHandler) HandleGetProcessingItems(c *fiber.Ctx) error {
 			})
 		}
 		filter["workerId"] = objID
+	}
+	if workerName != "" {
+		filter["workerName"] = workerName
 	}
 	if startDate != "" {
 		startDateParsed, err := time.Parse(time.RFC3339Nano, startDate)
@@ -197,12 +203,13 @@ func (h *ProcessingItemHandler) HandleInsertProcessingItem(c *fiber.Ctx) error {
 	}
 
 	processingItem := types.ProcessingItem{
-		Name:     params.Name,
-		Quantity: params.Quantity,
-		Price:    params.Price,
-		WorkerID: workerID,
-		SKU:      params.SKU,
-		Remarks:  params.Remarks,
+		Name:       params.Name,
+		Quantity:   params.Quantity,
+		Price:      params.Price,
+		WorkerID:   workerID,
+		WorkerName: params.WorkerName,
+		SKU:        params.SKU,
+		Remarks:    params.Remarks,
 	}
 
 	if params.StartDate != "" {
@@ -272,12 +279,13 @@ func (h *ProcessingItemHandler) HandleUpdateProcessingItem(c *fiber.Ctx) error {
 	}
 
 	updatedProcessingItem := types.ProcessingItem{
-		Name:     params.Name,
-		Quantity: params.Quantity,
-		Price:    params.Price,
-		WorkerID: workerID,
-		SKU:      params.SKU,
-		Remarks:  params.Remarks,
+		Name:       params.Name,
+		Quantity:   params.Quantity,
+		Price:      params.Price,
+		WorkerID:   workerID,
+		WorkerName: params.WorkerName,
+		SKU:        params.SKU,
+		Remarks:    params.Remarks,
 	}
 
 	if params.StartDate != "" {

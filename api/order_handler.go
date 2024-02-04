@@ -15,6 +15,7 @@ import (
 
 type InsertOrderParams struct {
 	CustomerID      string                  `json:"customerId"`
+	CustomerName    string                  `json:"customerName"`
 	OrderDate       string                  `json:"orderDate"`
 	DeliveryDate    string                  `json:"deliveryDate"`
 	PaymentDate     string                  `json:"paymentDate"`
@@ -33,6 +34,7 @@ type InsertOrderItemParams struct {
 type InsertOrderProductParams struct {
 	ID        string  `json:"id"`
 	SKU       string  `json:"sku"`
+	Name      string  `json:"name"`
 	UnitPrice float64 `json:"unitPrice"`
 }
 
@@ -42,6 +44,7 @@ func (p InsertOrderParams) validate() error {
 
 type UpdateOrderParams struct {
 	CustomerID      string                  `json:"customerId"`
+	CustomerName    string                  `json:"customerName"`
 	OrderDate       string                  `json:"orderDate"`
 	DeliveryDate    string                  `json:"deliveryDate"`
 	PaymentDate     string                  `json:"paymentDate"`
@@ -60,6 +63,7 @@ type UpdateOrderItemParams struct {
 type UpdateOrderProductParams struct {
 	ID        string  `json:"id"`
 	SKU       string  `json:"sku"`
+	Name      string  `json:"name"`
 	UnitPrice float64 `json:"unitPrice"`
 }
 
@@ -180,6 +184,7 @@ func (h *OrderHandler) HandleInsertOrder(c *fiber.Ctx) error {
 			Product: types.OrderProduct{
 				ID:        productID,
 				SKU:       item.Product.SKU,
+				Name:      item.Product.Name,
 				UnitPrice: item.Product.UnitPrice,
 			},
 			Quantity:   item.Quantity,
@@ -189,6 +194,7 @@ func (h *OrderHandler) HandleInsertOrder(c *fiber.Ctx) error {
 
 	order := types.Order{
 		CustomerID:      customerID,
+		CustomerName:    params.CustomerName,
 		OrderDate:       orderDateParsed,
 		TotalAmount:     params.TotalAmount,
 		Status:          params.Status,
@@ -303,6 +309,7 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 			Product: types.OrderProduct{
 				ID:        productID,
 				SKU:       item.Product.SKU,
+				Name:      item.Product.Name,
 				UnitPrice: item.Product.UnitPrice,
 			},
 			Quantity:   item.Quantity,
@@ -312,6 +319,7 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 
 	updatedOrder := types.Order{
 		CustomerID:      customerID,
+		CustomerName:    params.CustomerName,
 		OrderDate:       orderDateParsed,
 		TotalAmount:     params.TotalAmount,
 		Status:          params.Status,

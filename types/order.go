@@ -9,6 +9,7 @@ import (
 type Order struct {
 	ID              primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	CustomerID      primitive.ObjectID `bson:"customerId" json:"customerId"`
+	CustomerName    string             `bson:"customerName" json:"customerName"`
 	OrderDate       time.Time          `bson:"orderDate" json:"orderDate"`
 	DeliveryDate    time.Time          `bson:"deliveryDate" json:"deliveryDate"`
 	PaymentDate     time.Time          `bson:"paymentDate" json:"paymentDate"`
@@ -29,5 +30,6 @@ type OrderItem struct {
 type OrderProduct struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	SKU       string             `bson:"sku,omitempty" json:"sku,omitempty"`
+	Name      string             `bson:"name" json:"name"`
 	UnitPrice float64            `bson:"unitPrice" json:"unitPrice"`
 }

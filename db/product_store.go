@@ -18,8 +18,9 @@ type ProductStore interface {
 	InsertProduct(context.Context, *types.Product) (*types.Product, error)
 	UpdateProduct(ctx context.Context, productID primitive.ObjectID, updatedProduct *types.Product) (int64, error)
 	DeleteProduct(ctx context.Context, id primitive.ObjectID) (int64, error)
-	GetProductColors(ctx context.Context) ([]string, error)
-	GetProductSizes(ctx context.Context) ([]string, error)
+	GetProductColors(context.Context, string) ([]string, error)
+	GetProductTypes(context.Context) ([]string, error)
+	GetProductSizes(context.Context, string) ([]string, error)
 	CheckExistedSKU(ctx context.Context, sku string) (bool, error)
 	CheckDuplicateSKU(ctx context.Context, sku string, productID primitive.ObjectID) (bool, error)
 	DecreaseProductQuantity(ctx context.Context, productID primitive.ObjectID, quantity int) (int64, error)
@@ -101,8 +102,13 @@ func (s *MongoProductStore) DeleteProduct(ctx context.Context, id primitive.Obje
 	return deleteResult.DeletedCount, err
 }
 
-func (s *MongoProductStore) GetProductColors(ctx context.Context) ([]string, error) {
-	colors, err := s.coll.Distinct(ctx, "color", bson.M{})
+func (s *MongoProductStore) GetProductColors(ctx context.Context, productType string) ([]string, error) {
+	filter := bson.M{}
+	if productType != "" {
+		filter["type"] = productType
+	}
+
+	colors, err := s.coll.Distinct(ctx, "color", filter)
 	if err != nil {
 		return nil, err
 	}
@@ -117,8 +123,29 @@ func (s *MongoProductStore) GetProductColors(ctx context.Context) ([]string, err
 	return colorStrings, nil
 }
 
-func (s *MongoProductStore) GetProductSizes(ctx context.Context) ([]string, error) {
-	sizes, err := s.coll.Distinct(ctx, "size", bson.M{})
+func (s *MongoProductStore) GetProductTypes(ctx context.Context) ([]string, error) {
+	types, err := s.coll.Distinct(ctx, "type", bson.M{})
+	if err != nil {
+		return nil, err
+	}
+
+	var typeStrings []string
+	for _, t := range types {
+		if typeStr, ok := t.(string); ok {
+			typeStrings = append(typeStrings, typeStr)
+		}
+	}
+
+	return typeStrings, nil
+}
+
+func (s *MongoProductStore) GetProductSizes(ctx context.Context, productType string) ([]string, error) {
+	filter := bson.M{}
+	if productType != "" {
+		filter["type"] = productType
+	}
+
+	sizes, err := s.coll.Distinct(ctx, "size", filter)
 	if err != nil {
 		return nil, err
 	}

@@ -15,6 +15,7 @@ import (
 type InsertMaterialParams struct {
 	Name         string                    `json:"name"`
 	Color        string                    `json:"color"`
+	Type         string                    `json:"type"`
 	Size         string                    `json:"size"`
 	Quantity     int                       `json:"quantity"`
 	Remarks      string                    `json:"remarks"`
@@ -34,6 +35,7 @@ func (p InsertMaterialParams) validate() error {
 type UpdateMaterialParams struct {
 	Name         string                    `json:"name"`
 	Color        string                    `json:"color"`
+	Type         string                    `json:"type"`
 	Size         string                    `json:"size"`
 	Quantity     int                       `json:"quantity"`
 	Remarks      string                    `json:"remarks"`
@@ -159,6 +161,7 @@ func (h *MaterialHandler) HandleInsertMaterial(c *fiber.Ctx) error {
 	material := types.Material{
 		Name:         params.Name,
 		Color:        params.Color,
+		Type:         params.Type,
 		Size:         params.Size,
 		Quantity:     params.Quantity,
 		Remarks:      params.Remarks,
@@ -219,6 +222,7 @@ func (h *MaterialHandler) HandleUpdateMaterial(c *fiber.Ctx) error {
 	updatedMaterial := types.Material{
 		Name:         params.Name,
 		Color:        params.Color,
+		Type:         params.Type,
 		Size:         params.Size,
 		Quantity:     params.Quantity,
 		Remarks:      params.Remarks,
@@ -276,10 +280,12 @@ func (h *MaterialHandler) HandleDeleteMaterial(c *fiber.Ctx) error {
 // @Description Get a list of unique material colors.
 // @Tags Material
 // @Produce json
+// @Param type path string true "Type"
 // @Success 200 {array} string
 // @Router /material/colors [get]
 func (h *MaterialHandler) HandleGetMaterialColors(c *fiber.Ctx) error {
-	colors, err := h.store.Material.GetMaterialColors(c.Context())
+	materialType := c.Query("type")
+	colors, err := h.store.Material.GetMaterialColors(c.Context(), materialType)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to retrieve material colors",
@@ -289,15 +295,35 @@ func (h *MaterialHandler) HandleGetMaterialColors(c *fiber.Ctx) error {
 	return c.JSON(colors)
 }
 
+// HandleGetMaterialTypes retrieves a list of unique material types.
+// @Summary Get material types
+// @Description Get a list of unique material types.
+// @Tags Material
+// @Produce json
+// @Success 200 {array} string
+// @Router /material/types [get]
+func (h *MaterialHandler) HandleGetMaterialTypes(c *fiber.Ctx) error {
+	types, err := h.store.Material.GetMaterialTypes(c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to retrieve material types",
+		})
+	}
+
+	return c.JSON(types)
+}
+
 // HandleGetMaterialSizes retrieves a list of unique material sizes.
 // @Summary Get material sizes
 // @Description Get a list of unique material sizes.
 // @Tags Material
 // @Produce json
+// @Param type path string true "Type"
 // @Success 200 {array} string
 // @Router /material/sizes [get]
 func (h *MaterialHandler) HandleGetMaterialSizes(c *fiber.Ctx) error {
-	sizes, err := h.store.Material.GetMaterialSizes(c.Context())
+	materialType := c.Query("type")
+	sizes, err := h.store.Material.GetMaterialSizes(c.Context(), materialType)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to retrieve material sizes",

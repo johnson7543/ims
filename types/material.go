@@ -15,6 +15,7 @@ type Material struct {
 	ID           primitive.ObjectID  `bson:"_id,omitempty" json:"id,omitempty"`
 	Name         string              `bson:"name" json:"name"`
 	Color        string              `bson:"color" json:"color"`
+	Type         string              `bson:"type" json:"type"`
 	Size         string              `bson:"size" json:"size"`
 	Quantity     int                 `bson:"quantity" json:"quantity"`
 	Remarks      string              `bson:"remarks" json:"remarks"`

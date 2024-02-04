@@ -18,6 +18,7 @@ type InsertProductParams struct {
 	Name     string  `json:"name"`
 	Material string  `json:"material"`
 	Color    string  `json:"color"`
+	Type     string  `json:"type"`
 	Size     string  `json:"size"`
 	Quantity int     `json:"quantity"`
 	Price    float64 `json:"price"`
@@ -34,6 +35,7 @@ type UpdateProductParams struct {
 	Name     string  `json:"name"`
 	Material string  `json:"material"`
 	Color    string  `json:"color"`
+	Type     string  `json:"type"`
 	Size     string  `json:"size"`
 	Quantity int     `json:"quantity"`
 	Price    float64 `json:"price"`
@@ -206,6 +208,7 @@ func (h *ProductHandler) HandleInsertProduct(c *fiber.Ctx) error {
 		Name:     params.Name,
 		Material: params.Material,
 		Color:    params.Color,
+		Type:     params.Type,
 		Size:     params.Size,
 		Quantity: params.Quantity,
 		Price:    params.Price,
@@ -274,6 +277,7 @@ func (h *ProductHandler) HandleUpdateProduct(c *fiber.Ctx) error {
 		Name:     params.Name,
 		Material: params.Material,
 		Color:    params.Color,
+		Type:     params.Type,
 		Size:     params.Size,
 		Quantity: params.Quantity,
 		Price:    params.Price,
@@ -338,4 +342,62 @@ func (h *ProductHandler) HandleDeleteProduct(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "Product deleted successfully",
 	})
+}
+
+// HandleGetProductColors retrieves a list of unique product colors.
+// @Summary Get product colors
+// @Description Get a list of unique product colors.
+// @Tags Product
+// @Produce json
+// @Param type path string true "Type"
+// @Success 200 {array} string
+// @Router /product/colors [get]
+func (h *ProductHandler) HandleGetProductColors(c *fiber.Ctx) error {
+	productType := c.Query("type")
+	colors, err := h.store.Product.GetProductColors(c.Context(), productType)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to retrieve product colors",
+		})
+	}
+
+	return c.JSON(colors)
+}
+
+// HandleGetProductTypes retrieves a list of unique product types.
+// @Summary Get product types
+// @Description Get a list of unique product types.
+// @Tags Product
+// @Produce json
+// @Success 200 {array} string
+// @Router /product/types [get]
+func (h *ProductHandler) HandleGetProductTypes(c *fiber.Ctx) error {
+	types, err := h.store.Product.GetProductTypes(c.Context())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to retrieve product types",
+		})
+	}
+
+	return c.JSON(types)
+}
+
+// HandleGetProductSizes retrieves a list of unique product sizes.
+// @Summary Get product sizes
+// @Description Get a list of unique product sizes.
+// @Tags Product
+// @Produce json
+// @Param type path string true "Type"
+// @Success 200 {array} string
+// @Router /product/sizes [get]
+func (h *ProductHandler) HandleGetProductSizes(c *fiber.Ctx) error {
+	productType := c.Query("type")
+	sizes, err := h.store.Product.GetProductSizes(c.Context(), productType)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to retrieve product sizes",
+		})
+	}
+
+	return c.JSON(sizes)
 }
