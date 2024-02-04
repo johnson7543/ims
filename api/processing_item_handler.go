@@ -36,8 +36,8 @@ type UpdateProcessingItemParams struct {
 	Price      float64 `json:"price"`
 	WorkerID   string  `json:"workerId"`
 	WorkerName string  `json:"workerName"`
-	StartDate  string  `json:"start_date"`
-	EndDate    string  `json:"end_date"`
+	StartDate  string  `json:"startDate"`
+	EndDate    string  `json:"endDate"`
 	SKU        string  `json:"sku"`
 	Remarks    string  `json:"remarks"`
 }

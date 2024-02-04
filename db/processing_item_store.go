@@ -73,7 +73,7 @@ func (s *MongoProcessingItemStore) UpdateProcessingItem(ctx context.Context, id 
 			"name":      updatedProcessingItem.Name,
 			"quantity":  updatedProcessingItem.Quantity,
 			"price":     updatedProcessingItem.Price,
-			"workerID":  updatedProcessingItem.WorkerID,
+			"workerId":  updatedProcessingItem.WorkerID,
 			"remarks":   updatedProcessingItem.Remarks,
 			"startDate": updatedProcessingItem.StartDate,
 			"endDate":   updatedProcessingItem.EndDate,
