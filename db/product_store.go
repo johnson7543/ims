@@ -81,6 +81,7 @@ func (s *MongoProductStore) UpdateProduct(ctx context.Context, productID primiti
 			"name":     updatedProduct.Name,
 			"material": updatedProduct.Material,
 			"color":    updatedProduct.Color,
+			"type":     updatedProduct.Type,
 			"size":     updatedProduct.Size,
 			"quantity": updatedProduct.Quantity,
 			"price":    updatedProduct.Price,

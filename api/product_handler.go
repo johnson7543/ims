@@ -301,7 +301,7 @@ func (h *ProductHandler) HandleUpdateProduct(c *fiber.Ctx) error {
 
 	if updateCount == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Product not found",
+			"error": "Product not found or not updated",
 		})
 	}
 

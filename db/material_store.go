@@ -94,6 +94,7 @@ func (s *MongoMaterialStore) UpdateMaterial(ctx context.Context, materialID prim
 		"$set": bson.M{
 			"name":          updates.Name,
 			"color":         updates.Color,
+			"type":          updates.Type,
 			"size":          updates.Size,
 			"quantity":      updates.Quantity,
 			"remarks":       updates.Remarks,
