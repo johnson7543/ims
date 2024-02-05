@@ -43,28 +43,14 @@ func (p InsertOrderParams) validate() error {
 }
 
 type UpdateOrderParams struct {
-	CustomerID      string                  `json:"customerId"`
-	CustomerName    string                  `json:"customerName"`
-	OrderDate       string                  `json:"orderDate"`
-	DeliveryDate    string                  `json:"deliveryDate"`
-	PaymentDate     string                  `json:"paymentDate"`
-	TotalAmount     float64                 `json:"totalAmount"`
-	Status          string                  `json:"status"`
-	ShippingAddress string                  `json:"shippingAddress"`
-	OrderItems      []UpdateOrderItemParams `json:"orderItems"`
-}
-
-type UpdateOrderItemParams struct {
-	Product    UpdateOrderProductParams `json:"product"`
-	Quantity   int                      `json:"quantity"`
-	TotalPrice float64                  `json:"totalPrice"`
-}
-
-type UpdateOrderProductParams struct {
-	ID        string  `json:"id"`
-	SKU       string  `json:"sku"`
-	Name      string  `json:"name"`
-	UnitPrice float64 `json:"unitPrice"`
+	CustomerID      string  `json:"customerId"`
+	CustomerName    string  `json:"customerName"`
+	OrderDate       string  `json:"orderDate"`
+	DeliveryDate    string  `json:"deliveryDate"`
+	PaymentDate     string  `json:"paymentDate"`
+	TotalAmount     float64 `json:"totalAmount"`
+	Status          string  `json:"status"`
+	ShippingAddress string  `json:"shippingAddress"`
 }
 
 func (p UpdateOrderParams) validate() error {
@@ -228,15 +214,8 @@ func (h *OrderHandler) HandleInsertOrder(c *fiber.Ctx) error {
 	}
 
 	// Decrease product quantities after successfully inserting the order
-	for _, item := range params.OrderItems {
-		productID, err := primitive.ObjectIDFromHex(item.Product.ID)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": fmt.Sprintf("Invalid product ID: %s", item.Product.ID),
-			})
-		}
-
-		updatedCount, err := h.store.Product.DecreaseProductQuantity(c.Context(), productID, item.Quantity)
+	for _, item := range orderItems {
+		updatedCount, err := h.store.Product.DecreaseProductQuantity(c.Context(), item.Product.ID, item.Quantity)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": fmt.Sprintf("Failed to decrease product %s by %d, %s", item.Product.ID, item.Quantity, err.Error()),
@@ -296,27 +275,6 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 		})
 	}
 
-	orderItems := make([]types.OrderItem, len(params.OrderItems))
-	for i, item := range params.OrderItems {
-		productID, err := primitive.ObjectIDFromHex(item.Product.ID)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid product ID",
-			})
-		}
-
-		orderItems[i] = types.OrderItem{
-			Product: types.OrderProduct{
-				ID:        productID,
-				SKU:       item.Product.SKU,
-				Name:      item.Product.Name,
-				UnitPrice: item.Product.UnitPrice,
-			},
-			Quantity:   item.Quantity,
-			TotalPrice: item.TotalPrice,
-		}
-	}
-
 	updatedOrder := types.Order{
 		CustomerID:      customerID,
 		CustomerName:    params.CustomerName,
@@ -324,7 +282,6 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 		TotalAmount:     params.TotalAmount,
 		Status:          params.Status,
 		ShippingAddress: params.ShippingAddress,
-		OrderItems:      orderItems,
 	}
 
 	if params.DeliveryDate != "" {
@@ -347,6 +304,12 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 		updatedOrder.PaymentDate = paymentDateParsed
 	}
 
+	// Caching the original order before updating
+	existingOrder, err := h.store.Order.GetOrders(c.Context(), bson.M{"_id": orderID})
+	if err != nil {
+		return err
+	}
+
 	updateCount, err := h.store.Order.UpdateOrder(c.Context(), orderID, &updatedOrder)
 	if err != nil {
 		return err
@@ -354,17 +317,13 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 
 	if updateCount == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Order not found",
+			"error": "Order not found or not updated",
 		})
 	}
 
-	existingOrder, err := h.store.Order.GetOrders(c.Context(), bson.M{"_id": orderID})
-	if err != nil {
-		return err
-	}
-
+	// Update product quantities if order status is changed to canceled
 	if strings.ToLower(existingOrder[0].Status) != "canceled" && strings.ToLower(params.Status) == "canceled" {
-		for _, item := range orderItems {
+		for _, item := range existingOrder[0].OrderItems {
 			updatedCount, err := h.store.Product.IncreaseProductQuantity(c.Context(), item.Product.ID, item.Quantity)
 			if err != nil {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -417,4 +376,107 @@ func (h *OrderHandler) HandleDeleteOrder(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "Order deleted successfully",
 	})
+}
+
+// HandleInsertOrderItemsToOrder insert order items by order ID.
+//
+// @Summary Delete order
+// @Description Deletes an order by ID.
+// @Tags Order
+// @Param id path string true "Order ID"
+// @Param body body InsertOrderItemParams true "Insert order items"
+// @Produce json
+// @Success 200 {object} fiber.Map
+// @Router /order/orderItems/{id} [post]
+func (h *OrderHandler) HandleInsertOrderItemsToOrder(c *fiber.Ctx) error {
+	id := c.Params("id")
+	orderID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	var params []InsertOrderItemParams
+	if err := c.BodyParser(&params); err != nil {
+		return err
+	}
+
+	newTotalAmount := 0.0
+	orderItems := make([]types.OrderItem, len(params))
+	for i, item := range params {
+		productID, err := primitive.ObjectIDFromHex(item.Product.ID)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid product ID",
+			})
+		}
+
+		orderItems[i] = types.OrderItem{
+			Product: types.OrderProduct{
+				ID:        productID,
+				SKU:       item.Product.SKU,
+				Name:      item.Product.Name,
+				UnitPrice: item.Product.UnitPrice,
+			},
+			Quantity:   item.Quantity,
+			TotalPrice: item.TotalPrice,
+		}
+
+		newTotalAmount = newTotalAmount + item.TotalPrice
+	}
+
+	// Inset items into order
+	updatedOrder := types.Order{
+		OrderItems: orderItems,
+	}
+
+	updateCount, err := h.store.Order.InsertOrderItems(c.Context(), orderID, &updatedOrder)
+	if err != nil {
+		return err
+	}
+
+	if updateCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Order not found or not updated",
+		})
+	}
+
+	order, err := h.store.Order.GetOrders(c.Context(), bson.M{"_id": orderID})
+	if err != nil {
+		return err
+	}
+
+	// Decrease product quantities after successfully inserting the order items to a non-canceled order
+	if strings.ToLower(order[0].Status) != "canceled" {
+		for _, item := range orderItems {
+			updatedCount, err := h.store.Product.DecreaseProductQuantity(c.Context(), item.Product.ID, item.Quantity)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": fmt.Sprintf("Failed to decrease product %s by %d, %s", item.Product.ID, item.Quantity, err.Error()),
+				})
+			}
+
+			if updatedCount == 0 {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": fmt.Sprintf("Failed to decrease product %s by %d", item.Product.ID, item.Quantity),
+				})
+			}
+
+		}
+	}
+
+	// Update total amount in the order
+	newTotalAmount = order[0].TotalAmount + newTotalAmount
+	updatedOrderTotalAmount := types.Order{
+		TotalAmount: newTotalAmount,
+	}
+
+	_, err = h.store.Order.UpdateOrderTotalAmount(c.Context(), orderID, &updatedOrderTotalAmount)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(fiber.Map{
+		"message": fmt.Sprintf("Inserted Order items into order id: %s successfully, new total amount: %f", orderID.Hex(), newTotalAmount),
+	})
+
 }

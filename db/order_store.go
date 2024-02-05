@@ -17,6 +17,8 @@ type OrderStore interface {
 	GetOrders(ctx context.Context, filter bson.M) ([]*types.Order, error)
 	InsertOrder(ctx context.Context, order *types.Order) (*types.Order, error)
 	UpdateOrder(ctx context.Context, orderID primitive.ObjectID, updatedOrder *types.Order) (int64, error)
+	UpdateOrderTotalAmount(ctx context.Context, orderID primitive.ObjectID, updatedOrder *types.Order) (int64, error)
+	InsertOrderItems(ctx context.Context, orderID primitive.ObjectID, updatedOrder *types.Order) (int64, error)
 	DeleteOrder(ctx context.Context, id primitive.ObjectID) (int64, error)
 }
 
@@ -75,7 +77,38 @@ func (s *MongoOrderStore) UpdateOrder(ctx context.Context, orderID primitive.Obj
 			"totalAmount":     updatedOrder.TotalAmount,
 			"status":          updatedOrder.Status,
 			"shippingAddress": updatedOrder.ShippingAddress,
-			"orderItems":      updatedOrder.OrderItems,
+		},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
+}
+
+func (s *MongoOrderStore) UpdateOrderTotalAmount(ctx context.Context, orderID primitive.ObjectID, updatedOrder *types.Order) (int64, error) {
+	filter := bson.M{"_id": orderID}
+	update := bson.M{
+		"$set": bson.M{
+			"totalAmount": updatedOrder.TotalAmount,
+		},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
+}
+
+func (s *MongoOrderStore) InsertOrderItems(ctx context.Context, orderID primitive.ObjectID, updatedOrder *types.Order) (int64, error) {
+	filter := bson.M{"_id": orderID}
+	update := bson.M{
+		"$push": bson.M{
+			"orderItems": bson.M{"$each": updatedOrder.OrderItems},
 		},
 	}
 

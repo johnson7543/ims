@@ -150,6 +150,7 @@ func main() {
 	apiv1.Post("/order", orderHandler.HandleInsertOrder)
 	apiv1.Patch("/order/:id", orderHandler.HandleUpdateOrder)
 	apiv1.Delete("/order/:id", orderHandler.HandleDeleteOrder)
+	apiv1.Post("/order/orderItems/:id", orderHandler.HandleInsertOrderItemsToOrder)
 
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 
