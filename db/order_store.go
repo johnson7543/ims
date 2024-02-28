@@ -72,8 +72,11 @@ func (s *MongoOrderStore) UpdateOrder(ctx context.Context, orderID primitive.Obj
 	filter := bson.M{"_id": orderID}
 	update := bson.M{
 		"$set": bson.M{
-			"deliveryDate":    updatedOrder.DeliveryDate,
+			"customerId":      updatedOrder.CustomerID,
+			"customerName":    updatedOrder.CustomerName,
+			"orderDate":       updatedOrder.OrderDate,
 			"paymentDate":     updatedOrder.PaymentDate,
+			"deliveryDate":    updatedOrder.DeliveryDate,
 			"totalAmount":     updatedOrder.TotalAmount,
 			"status":          updatedOrder.Status,
 			"shippingAddress": updatedOrder.ShippingAddress,

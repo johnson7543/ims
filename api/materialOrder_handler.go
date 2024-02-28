@@ -280,6 +280,20 @@ func (h *MaterialOrderHandler) HandleUpdateMaterialOrder(c *fiber.Ctx) error {
 		})
 	}
 
+	deliveryDateParsed, err := time.Parse(time.RFC3339Nano, params.DeliveryDate)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid order date format",
+		})
+	}
+
+	paymentDateParsed, err := time.Parse(time.RFC3339Nano, params.PaymentDate)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid order date format",
+		})
+	}
+
 	mo, err := h.store.MaterialOrder.GetMaterialOrder(c.Context(), materialOrderID)
 	if err != nil {
 		if err != mongo.ErrNoDocuments {
@@ -329,10 +343,12 @@ func (h *MaterialOrderHandler) HandleUpdateMaterialOrder(c *fiber.Ctx) error {
 	}
 
 	updatedMaterialOrder := types.MaterialOrder{
-		SellerID:    params.SellerID,
-		OrderDate:   orderDateParsed,
-		TotalAmount: params.TotalAmount,
-		Status:      params.Status,
+		SellerID:     params.SellerID,
+		OrderDate:    orderDateParsed,
+		DeliveryDate: deliveryDateParsed,
+		PaymentDate:  paymentDateParsed,
+		TotalAmount:  params.TotalAmount,
+		Status:       params.Status,
 	}
 
 	if params.DeliveryDate != "" {

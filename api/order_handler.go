@@ -275,10 +275,26 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 		})
 	}
 
+	deliveryDateParsed, err := time.Parse(time.RFC3339Nano, params.DeliveryDate)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid order date format",
+		})
+	}
+
+	paymentDateParsed, err := time.Parse(time.RFC3339Nano, params.PaymentDate)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid order date format",
+		})
+	}
+
 	updatedOrder := types.Order{
 		CustomerID:      customerID,
 		CustomerName:    params.CustomerName,
 		OrderDate:       orderDateParsed,
+		DeliveryDate:    deliveryDateParsed,
+		PaymentDate:     paymentDateParsed,
 		TotalAmount:     params.TotalAmount,
 		Status:          params.Status,
 		ShippingAddress: params.ShippingAddress,
