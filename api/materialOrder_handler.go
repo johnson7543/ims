@@ -17,6 +17,7 @@ import (
 type InsertMaterialOrderParams struct {
 	ID                 string  `json:"id,omitempty"`
 	SellerID           string  `json:"sellerID"`
+	SellerName         string  `json:"sellerName"`
 	OrderDate          string  `json:"orderDate"`
 	DeliveryDate       string  `json:"deliveryDate"`
 	PaymentDate        string  `json:"paymentDate"`
@@ -48,6 +49,7 @@ func (p InsertMaterialOrderParams) validate() error {
 type UpdateMaterialOrderParams struct {
 	ID           string  `json:"id,omitempty"`
 	SellerID     string  `json:"sellerID"`
+	SellerName   string  `json:"sellerName"`
 	OrderDate    string  `json:"orderDate"`
 	DeliveryDate string  `json:"deliveryDate"`
 	PaymentDate  string  `json:"paymentDate"`
@@ -211,6 +213,7 @@ func (h *MaterialOrderHandler) HandleInsertMaterialOrder(c *fiber.Ctx) error {
 
 	materialOrder := types.MaterialOrder{
 		SellerID:           params.SellerID,
+		SellerName:         params.SellerName,
 		OrderDate:          orderDateParsed,
 		TotalAmount:        params.TotalAmount,
 		Status:             params.Status,
@@ -344,6 +347,7 @@ func (h *MaterialOrderHandler) HandleUpdateMaterialOrder(c *fiber.Ctx) error {
 
 	updatedMaterialOrder := types.MaterialOrder{
 		SellerID:     params.SellerID,
+		SellerName:   params.SellerName,
 		OrderDate:    orderDateParsed,
 		DeliveryDate: deliveryDateParsed,
 		PaymentDate:  paymentDateParsed,

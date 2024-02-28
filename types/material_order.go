@@ -9,6 +9,7 @@ import (
 type MaterialOrder struct {
 	ID                 primitive.ObjectID  `bson:"_id,omitempty" json:"id,omitempty"`
 	SellerID           string              `bson:"sellerId" json:"sellerId"`
+	SellerName         string              `bson:"sellerName" json:"sellerName"`
 	OrderDate          time.Time           `bson:"orderDate" json:"orderDate"`
 	DeliveryDate       time.Time           `bson:"deliveryDate" json:"deliveryDate"`
 	PaymentDate        time.Time           `bson:"paymentDate" json:"paymentDate"`

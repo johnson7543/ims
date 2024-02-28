@@ -85,6 +85,7 @@ func (s *MongoMaterialOrderStore) UpdateMaterialOrder(ctx context.Context, order
 	update := bson.M{
 		"$set": bson.M{
 			"sellerId":     updatedOrder.SellerID,
+			"sellerName":   updatedOrder.SellerName,
 			"orderDate":    updatedOrder.OrderDate,
 			"deliveryDate": updatedOrder.DeliveryDate,
 			"paymentDate":  updatedOrder.PaymentDate,
