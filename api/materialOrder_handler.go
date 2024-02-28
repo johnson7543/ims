@@ -184,7 +184,7 @@ func (h *MaterialOrderHandler) HandleInsertMaterialOrder(c *fiber.Ctx) error {
 				}
 
 				return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-					"error": "Material doesn't exist, please create the material first.",
+					"error": fmt.Sprintf("Material %s doesn't exist, please create the material first.", materialID),
 				})
 			} else {
 				material := *m // make a copy
@@ -353,26 +353,6 @@ func (h *MaterialOrderHandler) HandleUpdateMaterialOrder(c *fiber.Ctx) error {
 		PaymentDate:  paymentDateParsed,
 		TotalAmount:  params.TotalAmount,
 		Status:       params.Status,
-	}
-
-	if params.DeliveryDate != "" {
-		deliveryDateParsed, err := time.Parse(time.RFC3339Nano, params.DeliveryDate)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid delivery date format",
-			})
-		}
-		updatedMaterialOrder.DeliveryDate = deliveryDateParsed
-	}
-
-	if params.PaymentDate != "" {
-		paymentDateParsed, err := time.Parse(time.RFC3339Nano, params.PaymentDate)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"error": "Invalid payment date format",
-			})
-		}
-		updatedMaterialOrder.PaymentDate = paymentDateParsed
 	}
 
 	updateCount, err := h.store.MaterialOrder.UpdateMaterialOrder(c.Context(), materialOrderID, &updatedMaterialOrder)
