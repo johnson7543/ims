@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const materialOrderColl = "materialOrders"
@@ -94,7 +95,7 @@ func (s *MongoMaterialOrderStore) UpdateMaterialOrder(ctx context.Context, order
 		},
 	}
 
-	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
 	if err != nil {
 		return 0, err
 	}
