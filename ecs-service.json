@@ -1,10 +1,10 @@
 {
-    "cluster": "circleci-cluster",
+    "cluster": "ims-circleci-cluster",
     "serviceName": "circleci-service",
     "taskDefinition": "circleci-service",
     "loadBalancers": [
         {
-            "targetGroupArn": "arn:aws:elasticloadbalancing:ap-northeast-1:418741758261:targetgroup/circleci-target-group/2f7b2ed32bde6c51",
+            "targetGroupArn": "arn:aws:elasticloadbalancing:ap-northeast-1:471112724062:targetgroup/circleci-target-group/996cddee3e9f4e84",
             "containerName": "circleci-service",
             "containerPort": 8080
         }
