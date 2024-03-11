@@ -1,5 +1,5 @@
 {
-    "cluster": "ims-circleci-cluster",
+    "cluster": "circleci-cluster",
     "serviceName": "circleci-service",
     "taskDefinition": "circleci-service",
     "loadBalancers": [
