@@ -19,6 +19,8 @@ type MaterialOrderStore interface {
 	GetMaterialOrder(context.Context, primitive.ObjectID) (*types.MaterialOrder, error)
 	InsertMaterialOrder(context.Context, *types.MaterialOrder) (*types.MaterialOrder, error)
 	UpdateMaterialOrder(context.Context, primitive.ObjectID, *types.MaterialOrder) (int64, error)
+	UpdateMaterialOrderTotalAmount(context.Context, primitive.ObjectID, *types.MaterialOrder) (int64, error)
+	InsertMaterialOrderItems(context.Context, primitive.ObjectID, *types.MaterialOrder) (int64, error)
 	DeleteMaterialOrder(context.Context, primitive.ObjectID) (int64, error)
 }
 
@@ -96,6 +98,38 @@ func (s *MongoMaterialOrderStore) UpdateMaterialOrder(ctx context.Context, order
 	}
 
 	updateResult, err := s.coll.UpdateOne(ctx, filter, update, options.Update().SetUpsert(true))
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
+}
+
+func (s *MongoMaterialOrderStore) UpdateMaterialOrderTotalAmount(ctx context.Context, materialOrderID primitive.ObjectID, updatedMaterialOrder *types.MaterialOrder) (int64, error) {
+	filter := bson.M{"_id": materialOrderID}
+	update := bson.M{
+		"$set": bson.M{
+			"totalAmount": updatedMaterialOrder.TotalAmount,
+		},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return 0, err
+	}
+
+	return updateResult.ModifiedCount, nil
+}
+
+func (s *MongoMaterialOrderStore) InsertMaterialOrderItems(ctx context.Context, materialOrderID primitive.ObjectID, updatedMaterialOrder *types.MaterialOrder) (int64, error) {
+	filter := bson.M{"_id": materialOrderID}
+	update := bson.M{
+		"$push": bson.M{
+			"materialOrderItems": bson.M{"$each": updatedMaterialOrder.MaterialOrderItems},
+		},
+	}
+
+	updateResult, err := s.coll.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return 0, err
 	}

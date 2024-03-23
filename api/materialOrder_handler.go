@@ -15,14 +15,14 @@ import (
 )
 
 type InsertMaterialOrderParams struct {
-	ID                 string  `json:"id,omitempty"`
-	SellerID           string  `json:"sellerID"`
-	SellerName         string  `json:"sellerName"`
-	OrderDate          string  `json:"orderDate"`
-	DeliveryDate       string  `json:"deliveryDate"`
-	PaymentDate        string  `json:"paymentDate"`
-	TotalAmount        float64 `json:"totalAmount"`
-	Status             string
+	ID                 string                          `json:"id,omitempty"`
+	SellerID           string                          `json:"sellerID"`
+	SellerName         string                          `json:"sellerName"`
+	OrderDate          string                          `json:"orderDate"`
+	DeliveryDate       string                          `json:"deliveryDate"`
+	PaymentDate        string                          `json:"paymentDate"`
+	TotalAmount        float64                         `json:"totalAmount"`
+	Status             string                          `json:"status"`
 	MaterialOrderItems []InsertMaterialOrderItemParams `json:"materialOrderItems"`
 }
 
@@ -176,7 +176,7 @@ func (h *MaterialOrderHandler) HandleInsertMaterialOrder(c *fiber.Ctx) error {
 		}
 
 		// update materail information
-		if strings.ToLower(params.Status) == "completed" {
+		if strings.EqualFold(params.Status, "completed") {
 			m, err := h.store.Material.GetMaterial(c.Context(), materialID)
 			if err != nil {
 				if err != mongo.ErrNoDocuments {
@@ -309,7 +309,7 @@ func (h *MaterialOrderHandler) HandleUpdateMaterialOrder(c *fiber.Ctx) error {
 	}
 
 	// update materail information if the status changed into completed status
-	if strings.ToLower(mo.Status) != "completed" && strings.ToLower(params.Status) == "completed" {
+	if !strings.EqualFold(mo.Status, "completed") && strings.EqualFold(params.Status, "completed") {
 		// update all material items in the material order
 		for _, item := range mo.MaterialOrderItems {
 			updatedCount, err := h.store.Material.IncreaseMaterialQuantity(c.Context(), item.Material.MaterialID, item.Quantity)
@@ -327,8 +327,8 @@ func (h *MaterialOrderHandler) HandleUpdateMaterialOrder(c *fiber.Ctx) error {
 		}
 	}
 
-	// Decrease material amount if the status changed into cancelled status
-	if strings.ToLower(mo.Status) == "completed" && strings.ToLower(params.Status) == "cancelled" {
+	// Decrease material amount if the status changed into canceled status
+	if strings.EqualFold(mo.Status, "completed") && strings.EqualFold(params.Status, "canceled") {
 		for _, item := range mo.MaterialOrderItems {
 			updatedCount, err := h.store.Material.DecreaseMaterialQuantity(c.Context(), item.Material.MaterialID, item.Quantity)
 			if err != nil {
@@ -403,4 +403,106 @@ func (h *MaterialOrderHandler) HandleDeleteMaterialOrder(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"message": "Material Order deleted successfully",
 	})
+}
+
+func (h *MaterialOrderHandler) HandleInsertMaterialOrderItemsToOrder(c *fiber.Ctx) error {
+	id := c.Params("id")
+	materialOrderID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	materialOrder, err := h.store.MaterialOrder.GetMaterialOrders(c.Context(), bson.M{"_id": materialOrderID})
+	if err != nil {
+		return err
+	}
+
+	if strings.EqualFold(materialOrder[0].Status, "canceled") {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Cannot insert items to a already canceled material order.",
+		})
+	}
+
+	var params []InsertMaterialOrderItemParams
+	if err := c.BodyParser(&params); err != nil {
+		return err
+	}
+
+	newTotalAmount := 0.0
+	materialOrderItems := make([]types.MaterialOrderItem, len(params))
+	for i, item := range params {
+		materialID, err := primitive.ObjectIDFromHex(item.Material.MaterialID)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error": "Invalid material ID",
+			})
+		}
+
+		material := types.MaterialOrderMaterial{
+			MaterialID: materialID,
+			Name:       item.Material.Name,
+			Price:      item.Material.Price,
+			Color:      item.Material.Color,
+			Size:       item.Material.Size,
+			Remarks:    item.Material.Remarks,
+		}
+
+		materialOrderItems[i] = types.MaterialOrderItem{
+			Material:   material,
+			Quantity:   item.Quantity,
+			TotalPrice: item.TotalPrice,
+		}
+		newTotalAmount = newTotalAmount + item.TotalPrice
+	}
+
+	// Inset items into material order
+	updatedMaterialOrder := types.MaterialOrder{
+		MaterialOrderItems: materialOrderItems,
+	}
+
+	updateCount, err := h.store.MaterialOrder.InsertMaterialOrderItems(c.Context(), materialOrderID, &updatedMaterialOrder)
+	if err != nil {
+		return err
+	}
+
+	if updateCount == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "Material Order not found or not updated",
+		})
+	}
+
+	// Increase material quantities after successfully inserting the material order items to a Completed material order
+	if strings.EqualFold(materialOrder[0].Status, "completed") {
+		for _, item := range materialOrderItems {
+			updatedCount, err := h.store.Material.IncreaseMaterialQuantity(c.Context(), item.Material.MaterialID, item.Quantity)
+			if err != nil {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": fmt.Sprintf("Failed to increase material %s by %d, %s", item.Material.MaterialID, item.Quantity, err.Error()),
+				})
+			}
+
+			if updatedCount == 0 {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+					"error": fmt.Sprintf("Failed to iecrease material %s by %d, material not found or not updated.", item.Material.MaterialID, item.Quantity),
+				})
+			}
+
+		}
+	}
+
+	// Update total amount in the material order
+	newTotalAmount = materialOrder[0].TotalAmount + newTotalAmount
+	updatedMaterialOrderTotalAmount := types.MaterialOrder{
+		TotalAmount: newTotalAmount,
+	}
+
+	_, err = h.store.MaterialOrder.UpdateMaterialOrderTotalAmount(c.Context(), materialOrderID, &updatedMaterialOrderTotalAmount)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(fiber.Map{
+		"message": fmt.Sprintf("Inserted Material Order items into material order id: %s successfully, new total amount: %f", materialOrderID.Hex(), newTotalAmount),
+	})
+
 }

@@ -112,6 +112,7 @@ func main() {
 	apiv1.Post("/materialOrder", materialOrderHandler.HandleInsertMaterialOrder)
 	apiv1.Patch("/materialOrder/:id", materialOrderHandler.HandleUpdateMaterialOrder)
 	apiv1.Delete("/materialOrder/:id", materialOrderHandler.HandleDeleteMaterialOrder)
+	apiv1.Post("/materialOrder/materialOrderItems/:id", materialOrderHandler.HandleInsertMaterialOrderItemsToOrder)
 
 	apiv1.Get("/worker", workerHandler.HandleGetWorkers)
 	apiv1.Post("/worker", workerHandler.HandleInsertWorker)

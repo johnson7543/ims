@@ -315,7 +315,7 @@ func (h *ProcessingItemHandler) HandleUpdateProcessingItem(c *fiber.Ctx) error {
 
 	if updateCount == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Processing Item not found",
+			"error": "Processing Item not found or not updated",
 		})
 	}
 

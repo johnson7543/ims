@@ -1,5 +1,5 @@
 {
-    "family": "circleci-service",
+    "family": "circleci-service-v2",
     "containerDefinitions": [
         {
             "name": "circleci-service",

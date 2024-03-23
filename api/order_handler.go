@@ -338,7 +338,7 @@ func (h *OrderHandler) HandleUpdateOrder(c *fiber.Ctx) error {
 	}
 
 	// Update product quantities if order status is changed to canceled
-	if strings.ToLower(existingOrder[0].Status) != "canceled" && strings.ToLower(params.Status) == "canceled" {
+	if !strings.EqualFold(existingOrder[0].Status, "canceled") && strings.EqualFold(params.Status, "canceled") {
 		for _, item := range existingOrder[0].OrderItems {
 			updatedCount, err := h.store.Product.IncreaseProductQuantity(c.Context(), item.Product.ID, item.Quantity)
 			if err != nil {
@@ -394,16 +394,6 @@ func (h *OrderHandler) HandleDeleteOrder(c *fiber.Ctx) error {
 	})
 }
 
-// HandleInsertOrderItemsToOrder insert order items by order ID.
-//
-// @Summary Delete order
-// @Description Deletes an order by ID.
-// @Tags Order
-// @Param id path string true "Order ID"
-// @Param body body InsertOrderItemParams true "Insert order items"
-// @Produce json
-// @Success 200 {object} fiber.Map
-// @Router /order/orderItems/{id} [post]
 func (h *OrderHandler) HandleInsertOrderItemsToOrder(c *fiber.Ctx) error {
 	id := c.Params("id")
 	orderID, err := primitive.ObjectIDFromHex(id)
@@ -414,6 +404,17 @@ func (h *OrderHandler) HandleInsertOrderItemsToOrder(c *fiber.Ctx) error {
 	var params []InsertOrderItemParams
 	if err := c.BodyParser(&params); err != nil {
 		return err
+	}
+
+	order, err := h.store.Order.GetOrders(c.Context(), bson.M{"_id": orderID})
+	if err != nil {
+		return err
+	}
+
+	if strings.EqualFold(order[0].Status, "canceled") {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Cannot insert items to a already canceled order.",
+		})
 	}
 
 	newTotalAmount := 0.0
@@ -456,13 +457,8 @@ func (h *OrderHandler) HandleInsertOrderItemsToOrder(c *fiber.Ctx) error {
 		})
 	}
 
-	order, err := h.store.Order.GetOrders(c.Context(), bson.M{"_id": orderID})
-	if err != nil {
-		return err
-	}
-
 	// Decrease product quantities after successfully inserting the order items to a non-canceled order
-	if strings.ToLower(order[0].Status) != "canceled" {
+	if !strings.EqualFold(order[0].Status, "canceled") {
 		for _, item := range orderItems {
 			updatedCount, err := h.store.Product.DecreaseProductQuantity(c.Context(), item.Product.ID, item.Quantity)
 			if err != nil {
@@ -473,7 +469,7 @@ func (h *OrderHandler) HandleInsertOrderItemsToOrder(c *fiber.Ctx) error {
 
 			if updatedCount == 0 {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-					"error": fmt.Sprintf("Failed to decrease product %s by %d", item.Product.ID, item.Quantity),
+					"error": fmt.Sprintf("Failed to decrease product %s by %d, product not found or not updated.", item.Product.ID, item.Quantity),
 				})
 			}
 

@@ -70,14 +70,15 @@ func (s *MongoProcessingItemStore) UpdateProcessingItem(ctx context.Context, id 
 	filter := bson.M{"_id": id}
 	update := bson.M{
 		"$set": bson.M{
-			"name":      updatedProcessingItem.Name,
-			"quantity":  updatedProcessingItem.Quantity,
-			"price":     updatedProcessingItem.Price,
-			"workerId":  updatedProcessingItem.WorkerID,
-			"remarks":   updatedProcessingItem.Remarks,
-			"startDate": updatedProcessingItem.StartDate,
-			"endDate":   updatedProcessingItem.EndDate,
-			"SKU":       updatedProcessingItem.SKU,
+			"name":       updatedProcessingItem.Name,
+			"quantity":   updatedProcessingItem.Quantity,
+			"price":      updatedProcessingItem.Price,
+			"workerId":   updatedProcessingItem.WorkerID,
+			"workerName": updatedProcessingItem.WorkerName,
+			"remarks":    updatedProcessingItem.Remarks,
+			"startDate":  updatedProcessingItem.StartDate,
+			"endDate":    updatedProcessingItem.EndDate,
+			"SKU":        updatedProcessingItem.SKU,
 		},
 	}
 
