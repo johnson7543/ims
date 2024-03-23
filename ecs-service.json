@@ -1,7 +1,7 @@
 {
     "cluster": "circleci-cluster",
     "serviceName": "circleci-service",
-    "taskDefinition": "circleci-service-v2",
+    "taskDefinition": "circleci-service",
     "loadBalancers": [
         {
             "targetGroupArn": "arn:aws:elasticloadbalancing:ap-northeast-1:471112724062:targetgroup/circleci-target-group/4a9d7790e0716d12",
