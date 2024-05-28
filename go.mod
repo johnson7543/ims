@@ -1,9 +1,10 @@
 module github.com/johnson7543/ims
 
-go 1.18
+go 1.19
 
 require (
 	github.com/gofiber/fiber/v2 v2.49.2
+	github.com/swaggo/swag v1.16.2
 	golang.org/x/crypto v0.7.0
 )
 
@@ -20,8 +21,6 @@ require (
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
-	github.com/swaggo/files/v2 v2.0.0 // indirect
-	github.com/swaggo/swag v1.16.2 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
@@ -35,7 +34,6 @@ require (
 
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
-	github.com/gofiber/swagger v0.1.13
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/joho/godotenv v1.5.1

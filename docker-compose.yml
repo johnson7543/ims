@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+
+    # Optional: Set volume to persist data
+    # volumes:
+    #   - mongo-data:/data/db
+
+    # Optional: Set environment variables for MongoDB
+    # environment:
+    #   MONGO_INITDB_ROOT_USERNAME: root
+    #   MONGO_INITDB_ROOT_PASSWORD: example
+
+    ports:
+      - "27017:27017" 
