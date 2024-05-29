@@ -40,8 +40,8 @@ func main() {
 		User: db.NewMongoUserStore(client),
 	}
 
-	user := fixtures.AddUser(store, "johnsonwang", "test", false)
-	fmt.Println("johnsonwang ->", api.CreateTokenFromUser(user))
+	// user := fixtures.AddUser(store, "johnsonwang", "test", false)
+	// fmt.Println("johnsonwang ->", api.CreateTokenFromUser(user))
 	admin := fixtures.AddUser(store, "admin", "admin", true)
 	fmt.Println("admin ->", api.CreateTokenFromUser(admin))
 

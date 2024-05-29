@@ -2,7 +2,6 @@ package fixtures
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/johnson7543/ims/db"
@@ -75,10 +74,10 @@ func AddMaterial(store *db.Store, material *types.Material) *types.Material {
 
 func AddUser(store *db.Store, fn, ln string, admin bool) *types.User {
 	user, err := types.NewUserFromParams(types.CreateUserParams{
-		Email:     fmt.Sprintf("%s@%s.com", fn, ln),
+		Email:     fn,
 		FirstName: fn,
 		LastName:  ln,
-		Password:  fmt.Sprintf("%s_%s", fn, ln),
+		Password:  fn,
 	})
 	if err != nil {
 		log.Fatal(err)

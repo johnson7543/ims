@@ -101,6 +101,10 @@ func (s *MongoUserStore) GetUsers(ctx context.Context) ([]*types.User, error) {
 func (s *MongoUserStore) GetUserByEmail(ctx context.Context, email string) (*types.User, error) {
 	var user types.User
 	if err := s.coll.FindOne(ctx, bson.M{"email": email}).Decode(&user); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 	return &user, nil

@@ -7,6 +7,7 @@ import (
 
 	"github.com/johnson7543/ims/api"
 	"github.com/johnson7543/ims/db"
+	"github.com/johnson7543/ims/types"
 
 	_ "github.com/johnson7543/ims/docs"
 
@@ -83,6 +84,26 @@ func main() {
 		auth                  = app.Group("/api")
 		apiv1                 = app.Group("/api/v1", api.JWTAuthentication(userStore))
 	)
+
+	u, err := userStore.GetUserByEmail(context.TODO(), "admin")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if u == nil {
+		// Init an admin user
+		user, _ := types.NewUserFromParams(types.CreateUserParams{
+			Email:     "admin",
+			FirstName: "admin",
+			LastName:  "admin",
+			Password:  "admin",
+		})
+		user.IsAdmin = true
+		_, err = userStore.InsertUser(context.TODO(), user)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "*",
